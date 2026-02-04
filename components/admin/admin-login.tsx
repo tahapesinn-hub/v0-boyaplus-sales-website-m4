@@ -6,23 +6,34 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Lock, AlertCircle, User } from "lucide-react"
+import { Lock, AlertCircle, User, Loader2 } from "lucide-react"
 
 interface AdminLoginProps {
-  onLogin: (username: string, password: string) => boolean
+  onLogin: (username: string, password: string) => Promise<boolean>
 }
 
 export function AdminLogin({ onLogin }: AdminLoginProps) {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const success = onLogin(username, password)
-    if (!success) {
+    setIsLoading(true)
+    setError(false)
+    
+    try {
+      const success = await onLogin(username, password)
+      if (!success) {
+        setError(true)
+        setPassword("")
+      }
+    } catch {
       setError(true)
       setPassword("")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -54,6 +65,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                     setError(false)
                   }}
                   className="pl-9"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -72,6 +84,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                     setError(false)
                   }}
                   className="pl-9"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -83,8 +96,15 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
               </div>
             )}
             
-            <Button type="submit" className="w-full">
-              Giriş Yap
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Giriş yapılıyor...
+                </>
+              ) : (
+                "Giriş Yap"
+              )}
             </Button>
             
             <p className="text-xs text-center text-muted-foreground mt-4">

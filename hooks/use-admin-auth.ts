@@ -1,15 +1,17 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { type AdminUser, defaultUsers } from "@/lib/site-data"
+import { createClient } from "@/lib/supabase/client"
+import type { AdminUser } from "@/lib/site-data"
 
 const AUTH_KEY = "boyaplus_admin_auth"
-const STORAGE_KEY = "boyaplus_site_data"
 
 interface AuthState {
   isAuthenticated: boolean
   currentUser: AdminUser | null
 }
+
+const supabase = createClient()
 
 export function useAdminAuth() {
   const [authState, setAuthState] = useState<AuthState>({
@@ -18,55 +20,69 @@ export function useAdminAuth() {
   })
   const [isLoading, setIsLoading] = useState(true)
 
-  // Kullanıcı listesini al
-  const getUsers = useCallback((): AdminUser[] => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        return parsed.users || defaultUsers
-      } catch {
-        return defaultUsers
+  useEffect(() => {
+    const checkAuth = async () => {
+      const storedAuth = localStorage.getItem(AUTH_KEY)
+      if (storedAuth) {
+        try {
+          const parsed = JSON.parse(storedAuth) as AuthState
+          if (parsed.isAuthenticated && parsed.currentUser) {
+            // Kullanicinin hala veritabaninda var olduğunu kontrol et
+            const { data: user } = await supabase
+              .from("admin_users")
+              .select("*")
+              .eq("id", parsed.currentUser.id)
+              .single()
+            
+            if (user) {
+              setAuthState(parsed)
+            } else {
+              localStorage.removeItem(AUTH_KEY)
+            }
+          }
+        } catch {
+          // Gecersiz veri, ignore
+        }
       }
+      setIsLoading(false)
     }
-    return defaultUsers
+    
+    checkAuth()
   }, [])
 
-  useEffect(() => {
-    const storedAuth = localStorage.getItem(AUTH_KEY)
-    if (storedAuth) {
-      try {
-        const parsed = JSON.parse(storedAuth) as AuthState
-        if (parsed.isAuthenticated && parsed.currentUser) {
-          // Kullanıcının hala geçerli olduğunu kontrol et
-          const users = getUsers()
-          const userExists = users.find(u => u.id === parsed.currentUser?.id)
-          if (userExists) {
-            setAuthState(parsed)
-          }
-        }
-      } catch {
-        // Geçersiz veri, ignore
+  const login = useCallback(async (username: string, password: string): Promise<boolean> => {
+    try {
+      const { data: user, error } = await supabase
+        .from("admin_users")
+        .select("*")
+        .eq("username", username)
+        .eq("password", password)
+        .single()
+      
+      if (error || !user) {
+        return false
       }
-    }
-    setIsLoading(false)
-  }, [getUsers])
 
-  const login = useCallback((username: string, password: string): boolean => {
-    const users = getUsers()
-    const user = users.find(u => u.username === username && u.password === password)
-    
-    if (user) {
+      const adminUser: AdminUser = {
+        id: user.id,
+        username: user.username,
+        password: user.password,
+        name: user.name,
+        role: user.role,
+        createdAt: user.created_at,
+      }
+      
       const newAuthState: AuthState = {
         isAuthenticated: true,
-        currentUser: user,
+        currentUser: adminUser,
       }
       setAuthState(newAuthState)
       localStorage.setItem(AUTH_KEY, JSON.stringify(newAuthState))
       return true
+    } catch {
+      return false
     }
-    return false
-  }, [getUsers])
+  }, [])
 
   const logout = useCallback(() => {
     setAuthState({ isAuthenticated: false, currentUser: null })
