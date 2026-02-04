@@ -200,6 +200,9 @@ export function ProductsManager({ products, categories, onAdd, onUpdate, onDelet
                       src={product.images?.[0] || product.image} 
                       alt={product.name}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).parentElement!.style.display = "none"
+                      }}
                     />
                   </div>
                 )}
@@ -394,7 +397,7 @@ export function ProductsManager({ products, categories, onAdd, onUpdate, onDelet
                       className="relative group aspect-square rounded-lg overflow-hidden bg-muted border border-border"
                     >
                       <img 
-                        src={img || "/placeholder.svg"} 
+                        src={img} 
                         alt={`Görsel ${index + 1}`}
                         className="w-full h-full object-cover"
                         onError={(e) => {

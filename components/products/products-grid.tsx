@@ -27,9 +27,12 @@ function ProductCard({ product }: { product: Product }) {
       <div className="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 relative overflow-hidden">
         {productImage ? (
           <img 
-            src={productImage || "/placeholder.svg"} 
+            src={productImage} 
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none"
+            }}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">

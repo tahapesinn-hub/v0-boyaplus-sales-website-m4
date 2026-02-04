@@ -84,9 +84,12 @@ export default function ProductPage() {
                   {hasImages ? (
                     <>
                       <img 
-                        src={images[activeImageIndex] || "/placeholder.svg"} 
+                        src={images[activeImageIndex]} 
                         alt={`${product.name} - Görsel ${activeImageIndex + 1}`}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none"
+                        }}
                       />
                       {/* Navigasyon oklari */}
                       {images.length > 1 && (
@@ -139,9 +142,12 @@ export default function ProductPage() {
                         )}
                       >
                         <img 
-                          src={img || "/placeholder.svg"} 
+                          src={img} 
                           alt={`${product.name} - Küçük görsel ${index + 1}`}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none"
+                          }}
                         />
                       </button>
                     ))}
