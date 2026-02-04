@@ -9,6 +9,12 @@ export interface AdminUser {
   createdAt: string
 }
 
+export interface Category {
+  id: string
+  name: string
+  slug: string
+}
+
 export interface Product {
   id: string
   name: string
@@ -51,18 +57,24 @@ export interface SeoMeta {
 
 export interface SiteData {
   products: Product[]
+  categories: Category[]
   hero: HeroContent
   contact: ContactInfo
   seo: SeoMeta
   users: AdminUser[]
 }
 
+export const defaultCategories: Category[] = [
+  { id: "1", name: "İç Cephe Boyaları", slug: "ic-cephe" },
+  { id: "2", name: "Dış Cephe Boyaları", slug: "dis-cephe" },
+  { id: "3", name: "Ahşap Boyaları", slug: "ahsap" },
+  { id: "4", name: "Metal Boyaları", slug: "metal" },
+]
+
+// Geriye uyumluluk için
 export const categories = [
   { name: "Tümü", slug: "tumu" },
-  { name: "İç Cephe Boyaları", slug: "ic-cephe" },
-  { name: "Dış Cephe Boyaları", slug: "dis-cephe" },
-  { name: "Ahşap Boyaları", slug: "ahsap" },
-  { name: "Metal Boyaları", slug: "metal" },
+  ...defaultCategories.map(c => ({ name: c.name, slug: c.slug }))
 ]
 
 export const defaultProducts: Product[] = [
@@ -210,6 +222,7 @@ export const defaultUsers: AdminUser[] = [
 
 export const defaultSiteData: SiteData = {
   products: defaultProducts,
+  categories: defaultCategories,
   hero: defaultHero,
   contact: defaultContact,
   seo: defaultSeo,

@@ -11,8 +11,9 @@ import { HeroManager } from "@/components/admin/hero-manager"
 import { ContactManager } from "@/components/admin/contact-manager"
 import { SeoManager } from "@/components/admin/seo-manager"
 import { UsersManager } from "@/components/admin/users-manager"
+import { CategoriesManager } from "@/components/admin/categories-manager"
 
-type AdminTab = "products" | "hero" | "contact" | "seo" | "users"
+type AdminTab = "products" | "categories" | "hero" | "contact" | "seo" | "users"
 
 export default function AdminPage() {
   const { isAuthenticated, currentUser, isLoading: authLoading, login, logout } = useAdminAuth()
@@ -28,6 +29,9 @@ export default function AdminPage() {
     addUser,
     updateUser,
     deleteUser,
+    addCategory,
+    updateCategory,
+    deleteCategory,
     resetToDefaults,
   } = useSiteData()
   
@@ -68,9 +72,19 @@ export default function AdminPage() {
           {activeTab === "products" && (
             <ProductsManager
               products={data.products}
+              categories={data.categories || []}
               onAdd={addProduct}
               onUpdate={updateProduct}
               onDelete={deleteProduct}
+            />
+          )}
+          
+          {activeTab === "categories" && (
+            <CategoriesManager
+              categories={data.categories || []}
+              onAdd={addCategory}
+              onUpdate={updateCategory}
+              onDelete={deleteCategory}
             />
           )}
           

@@ -1,7 +1,6 @@
 "use client"
 
 import React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,11 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Plus, Pencil, Trash2, X } from "lucide-react"
-import { type Product, categories } from "@/lib/site-data"
+import { Plus, Pencil, Trash2 } from "lucide-react"
+import type { Product, Category } from "@/lib/site-data"
 
 interface ProductsManagerProps {
   products: Product[]
+  categories: Category[]
   onAdd: (product: Product) => void
   onUpdate: (id: string, product: Product) => void
   onDelete: (id: string) => void
@@ -46,7 +46,7 @@ const emptyProduct: Omit<Product, "id"> = {
   image: "",
 }
 
-export function ProductsManager({ products, onAdd, onUpdate, onDelete }: ProductsManagerProps) {
+export function ProductsManager({ products, categories, onAdd, onUpdate, onDelete }: ProductsManagerProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [formData, setFormData] = useState<Omit<Product, "id">>(emptyProduct)

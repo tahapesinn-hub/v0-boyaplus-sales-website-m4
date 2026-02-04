@@ -8,6 +8,7 @@ import {
   type ContactInfo, 
   type SeoMeta,
   type AdminUser,
+  type Category,
   defaultSiteData 
 } from "@/lib/site-data"
 
@@ -76,6 +77,25 @@ export function useSiteData() {
     saveData(newData)
   }, [data, saveData])
 
+  // Kategori işlemleri
+  const addCategory = useCallback((category: Category) => {
+    const newCategories = [...(data.categories || []), category]
+    const newData = { ...data, categories: newCategories }
+    saveData(newData)
+  }, [data, saveData])
+
+  const updateCategory = useCallback((id: string, category: Category) => {
+    const newCategories = (data.categories || []).map(c => c.id === id ? category : c)
+    const newData = { ...data, categories: newCategories }
+    saveData(newData)
+  }, [data, saveData])
+
+  const deleteCategory = useCallback((id: string) => {
+    const newCategories = (data.categories || []).filter(c => c.id !== id)
+    const newData = { ...data, categories: newCategories }
+    saveData(newData)
+  }, [data, saveData])
+
   // Kullanıcı işlemleri
   const addUser = useCallback((user: AdminUser) => {
     const newUsers = [...(data.users || []), user]
@@ -107,6 +127,9 @@ export function useSiteData() {
     addProduct,
     updateProduct,
     deleteProduct,
+    addCategory,
+    updateCategory,
+    deleteCategory,
     updateHero,
     updateContact,
     updateSeo,
