@@ -34,8 +34,8 @@ export interface Product {
 export interface HeroContent {
   title: string
   subtitle: string
-  buttonText: string
-  buttonLink: string
+  ctaText: string
+  ctaSecondaryText: string
 }
 
 export interface ContactInfo {
@@ -43,11 +43,7 @@ export interface ContactInfo {
   whatsapp: string
   email: string
   address: string
-  workingHours: {
-    weekdays: string
-    saturday: string
-    sunday: string
-  }
+  workingHours: string
 }
 
 export interface SeoMeta {
@@ -188,8 +184,8 @@ export const defaultProducts: Product[] = [
 export const defaultHero: HeroContent = {
   title: "Mekanlarınıza Renk ve Hayat Katın",
   subtitle: "Boyaplus ile premium kalite iç ve dış cephe boyaları. 25 yıllık tecrübemizle projeleriniz için en iyi çözümleri sunuyoruz.",
-  buttonText: "Ürünleri Keşfet",
-  buttonLink: "/urunler",
+  ctaText: "Ürünleri Keşfet",
+  ctaSecondaryText: "İletişime Geç",
 }
 
 export const defaultContact: ContactInfo = {
@@ -197,11 +193,7 @@ export const defaultContact: ContactInfo = {
   whatsapp: "905551234567",
   email: "info@boyaplus.com",
   address: "Organize Sanayi Bölgesi, 5. Cadde No: 42, Pendik, İstanbul",
-  workingHours: {
-    weekdays: "Pazartesi - Cuma: 08:00 - 18:00",
-    saturday: "Cumartesi: 09:00 - 14:00",
-    sunday: "Pazar: Kapalı",
-  },
+  workingHours: "Pazartesi - Cumartesi: 09:00 - 18:00",
 }
 
 export const defaultSeo: SeoMeta = {

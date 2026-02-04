@@ -94,53 +94,14 @@ export function ContactManager({ contact, onUpdate }: ContactManagerProps) {
               />
             </div>
 
-            <div className="space-y-4">
-              <Label>Çalışma Saatleri</Label>
-              
-              <div className="space-y-2">
-                <Label htmlFor="weekdays" className="text-sm font-normal text-muted-foreground">
-                  Hafta içi
-                </Label>
-                <Input
-                  id="weekdays"
-                  value={formData.workingHours.weekdays}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    workingHours: { ...prev.workingHours, weekdays: e.target.value }
-                  }))}
-                  placeholder="Pazartesi - Cuma: 08:00 - 18:00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="saturday" className="text-sm font-normal text-muted-foreground">
-                  Cumartesi
-                </Label>
-                <Input
-                  id="saturday"
-                  value={formData.workingHours.saturday}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    workingHours: { ...prev.workingHours, saturday: e.target.value }
-                  }))}
-                  placeholder="Cumartesi: 09:00 - 14:00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="sunday" className="text-sm font-normal text-muted-foreground">
-                  Pazar
-                </Label>
-                <Input
-                  id="sunday"
-                  value={formData.workingHours.sunday}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    workingHours: { ...prev.workingHours, sunday: e.target.value }
-                  }))}
-                  placeholder="Pazar: Kapalı"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="workingHours">Çalışma Saatleri</Label>
+              <Input
+                id="workingHours"
+                value={formData.workingHours}
+                onChange={(e) => setFormData(prev => ({ ...prev, workingHours: e.target.value }))}
+                placeholder="Pazartesi - Cumartesi: 09:00 - 18:00"
+              />
             </div>
 
             <Button type="submit" className="w-full sm:w-auto">

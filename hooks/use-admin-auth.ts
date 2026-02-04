@@ -47,7 +47,7 @@ export function useAdminAuth() {
     }
     
     checkAuth()
-  }, [])
+  }, [supabase])
 
   const login = useCallback(async (username: string, password: string): Promise<boolean> => {
     try {
@@ -81,7 +81,7 @@ export function useAdminAuth() {
     } catch {
       return false
     }
-  }, [])
+  }, [supabase])
 
   const logout = useCallback(() => {
     setAuthState({ isAuthenticated: false, currentUser: null })

@@ -27,14 +27,14 @@ export function HeroSection({ hero }: HeroSectionProps) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button size="lg" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Link href={hero.buttonLink}>
-                {hero.buttonText}
+              <Link href="/urunler">
+                {hero.ctaText}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 bg-transparent">
               <Link href="/iletisim">
-                Teklif Al
+                {hero.ctaSecondaryText}
               </Link>
             </Button>
           </div>
