@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useState, useEffect, useCallback } from "react"
 import type { 
   Product, 
   Category, 
@@ -14,205 +13,143 @@ import type {
 import { defaultSiteData } from "@/lib/site-data"
 
 export function useSiteData() {
-  const supabase = useMemo(() => createClient(), [])
   const [data, setData] = useState<SiteData>(defaultSiteData)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Verileri Supabase'den cek
   const fetchData = useCallback(async () => {
-    setIsLoading(true)
     try {
-      // Kategorileri cek
-      const { data: categories } = await supabase
-        .from("categories")
-        .select("*")
-        .order("created_at")
+      const res = await fetch("/api/data")
+      if (!res.ok) throw new Error("Failed to fetch")
+      const json = await res.json()
       
-      // Urunleri cek
-      const { data: products } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at")
-      
-      // Site ayarlarini cek
-      const { data: settings } = await supabase
-        .from("site_settings")
-        .select("*")
-      
-      // Admin kullanicilarini cek
-      const { data: users } = await supabase
-        .from("admin_users")
-        .select("*")
-        .order("created_at")
-
-      // Ayarlari parse et
-      const heroSetting = settings?.find(s => s.key === "hero")
-      const contactSetting = settings?.find(s => s.key === "contact")
-      const seoSetting = settings?.find(s => s.key === "seo")
-
       setData({
-        products: products?.map(p => ({
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
-          category: p.category,
-          categorySlug: p.category_slug,
-          description: p.description,
-          features: p.features || [],
-          coverage: p.coverage,
-          dryingTime: p.drying_time,
-          price: p.price,
-          colors: p.colors || [],
-          images: p.images || [],
-        })) || [],
-        categories: categories?.map(c => ({
-          id: c.id,
-          name: c.name,
-          slug: c.slug,
-        })) || [],
-        hero: heroSetting?.value || defaultSiteData.hero,
-        contact: contactSetting?.value || defaultSiteData.contact,
-        seo: seoSetting?.value || defaultSiteData.seo,
-        users: users?.map(u => ({
-          id: u.id,
-          username: u.username,
-          password: u.password,
-          name: u.name,
-          role: u.role,
-          createdAt: u.created_at,
-        })) || [],
+        categories: json.categories || defaultSiteData.categories,
+        products: json.products || defaultSiteData.products,
+        hero: json.hero || defaultSiteData.hero,
+        contact: json.contact || defaultSiteData.contact,
+        seo: json.seo || defaultSiteData.seo,
+        users: json.users || defaultSiteData.users,
       })
     } catch (error) {
       console.error("Veri cekme hatasi:", error)
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-  // Urun ekle
   const addProduct = useCallback(async (product: Product) => {
-    const { error } = await supabase.from("products").insert({
-      name: product.name,
-      slug: product.slug,
-      category: product.category,
-      category_slug: product.categorySlug,
-      description: product.description,
-      features: product.features,
-      coverage: product.coverage,
-      drying_time: product.dryingTime,
-      price: product.price,
-      colors: product.colors,
-      images: product.images,
+    await fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(product),
     })
-    if (!error) fetchData()
-  }, [supabase, fetchData])
+    fetchData()
+  }, [fetchData])
 
-  // Urun guncelle
   const updateProduct = useCallback(async (id: string, product: Product) => {
-    const { error } = await supabase.from("products").update({
-      name: product.name,
-      slug: product.slug,
-      category: product.category,
-      category_slug: product.categorySlug,
-      description: product.description,
-      features: product.features,
-      coverage: product.coverage,
-      drying_time: product.dryingTime,
-      price: product.price,
-      colors: product.colors,
-      images: product.images,
-    }).eq("id", id)
-    if (!error) fetchData()
-  }, [supabase, fetchData])
+    await fetch("/api/products", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...product }),
+    })
+    fetchData()
+  }, [fetchData])
 
-  // Urun sil
   const deleteProduct = useCallback(async (id: string) => {
-    const { error } = await supabase.from("products").delete().eq("id", id)
-    if (!error) fetchData()
-  }, [supabase, fetchData])
+    await fetch("/api/products", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    })
+    fetchData()
+  }, [fetchData])
 
-  // Kategori ekle
   const addCategory = useCallback(async (category: Category) => {
-    const { error } = await supabase.from("categories").insert({
-      name: category.name,
-      slug: category.slug,
+    await fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(category),
     })
-    if (!error) fetchData()
-  }, [supabase, fetchData])
+    fetchData()
+  }, [fetchData])
 
-  // Kategori guncelle
   const updateCategory = useCallback(async (id: string, category: Category) => {
-    const { error } = await supabase.from("categories").update({
-      name: category.name,
-      slug: category.slug,
-    }).eq("id", id)
-    if (!error) fetchData()
-  }, [supabase, fetchData])
-
-  // Kategori sil
-  const deleteCategory = useCallback(async (id: string) => {
-    const { error } = await supabase.from("categories").delete().eq("id", id)
-    if (!error) fetchData()
-  }, [supabase, fetchData])
-
-  // Hero guncelle
-  const updateHero = useCallback(async (hero: HeroContent) => {
-    const { error } = await supabase
-      .from("site_settings")
-      .upsert({ key: "hero", value: hero, updated_at: new Date().toISOString() }, { onConflict: "key" })
-    if (!error) fetchData()
-  }, [supabase, fetchData])
-
-  // Contact guncelle
-  const updateContact = useCallback(async (contact: ContactInfo) => {
-    const { error } = await supabase
-      .from("site_settings")
-      .upsert({ key: "contact", value: contact, updated_at: new Date().toISOString() }, { onConflict: "key" })
-    if (!error) fetchData()
-  }, [supabase, fetchData])
-
-  // SEO guncelle
-  const updateSeo = useCallback(async (seo: SeoMeta) => {
-    const { error } = await supabase
-      .from("site_settings")
-      .upsert({ key: "seo", value: seo, updated_at: new Date().toISOString() }, { onConflict: "key" })
-    if (!error) fetchData()
-  }, [supabase, fetchData])
-
-  // Kullanici ekle
-  const addUser = useCallback(async (user: AdminUser) => {
-    const { error } = await supabase.from("admin_users").insert({
-      username: user.username,
-      password: user.password,
-      name: user.name,
-      role: user.role,
+    await fetch("/api/categories", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...category }),
     })
-    if (!error) fetchData()
-  }, [supabase, fetchData])
+    fetchData()
+  }, [fetchData])
 
-  // Kullanici guncelle
+  const deleteCategory = useCallback(async (id: string) => {
+    await fetch("/api/categories", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    })
+    fetchData()
+  }, [fetchData])
+
+  const updateHero = useCallback(async (hero: HeroContent) => {
+    await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "hero", value: hero }),
+    })
+    fetchData()
+  }, [fetchData])
+
+  const updateContact = useCallback(async (contact: ContactInfo) => {
+    await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "contact", value: contact }),
+    })
+    fetchData()
+  }, [fetchData])
+
+  const updateSeo = useCallback(async (seo: SeoMeta) => {
+    await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "seo", value: seo }),
+    })
+    fetchData()
+  }, [fetchData])
+
+  const addUser = useCallback(async (user: AdminUser) => {
+    await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user),
+    })
+    fetchData()
+  }, [fetchData])
+
   const updateUser = useCallback(async (id: string, user: AdminUser) => {
-    const { error } = await supabase.from("admin_users").update({
-      username: user.username,
-      password: user.password,
-      name: user.name,
-      role: user.role,
-    }).eq("id", id)
-    if (!error) fetchData()
-  }, [supabase, fetchData])
+    await fetch("/api/users", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...user }),
+    })
+    fetchData()
+  }, [fetchData])
 
-  // Kullanici sil
   const deleteUser = useCallback(async (id: string) => {
-    const { error } = await supabase.from("admin_users").delete().eq("id", id)
-    if (!error) fetchData()
-  }, [supabase, fetchData])
+    await fetch("/api/users", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    })
+    fetchData()
+  }, [fetchData])
 
-  // Sifirla (Supabase ile kullanildiginda sadece yeniden yukler)
-  const resetToDefaults = useCallback(async () => {
+  const resetToDefaults = useCallback(() => {
     fetchData()
   }, [fetchData])
 
@@ -232,65 +169,27 @@ export function useSiteData() {
     updateUser,
     deleteUser,
     resetToDefaults,
-    refetch: fetchData,
   }
 }
 
-// Salt okunur versiyon (ziyaretci sayfalari icin)
 export function useSiteDataReadOnly() {
   const [data, setData] = useState<SiteData>(defaultSiteData)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Kategorileri cek
-        const { data: categories } = await supabase
-          .from("categories")
-          .select("*")
-          .order("created_at")
+        const res = await fetch("/api/data")
+        if (!res.ok) throw new Error("Failed to fetch")
+        const json = await res.json()
         
-        // Urunleri cek
-        const { data: products } = await supabase
-          .from("products")
-          .select("*")
-          .order("created_at")
-        
-        // Site ayarlarini cek
-        const { data: settings } = await supabase
-          .from("site_settings")
-          .select("*")
-
-        // Ayarlari parse et
-        const heroSetting = settings?.find(s => s.key === "hero")
-        const contactSetting = settings?.find(s => s.key === "contact")
-        const seoSetting = settings?.find(s => s.key === "seo")
-
         setData({
-          products: products?.map(p => ({
-            id: p.id,
-            name: p.name,
-            slug: p.slug,
-            category: p.category,
-            categorySlug: p.category_slug,
-            description: p.description,
-            features: p.features || [],
-            coverage: p.coverage,
-            dryingTime: p.drying_time,
-            price: p.price,
-            colors: p.colors || [],
-            images: p.images || [],
-          })) || [],
-          categories: categories?.map(c => ({
-            id: c.id,
-            name: c.name,
-            slug: c.slug,
-          })) || [],
-          hero: heroSetting?.value || defaultSiteData.hero,
-          contact: contactSetting?.value || defaultSiteData.contact,
-          seo: seoSetting?.value || defaultSiteData.seo,
-          users: [],
+          categories: json.categories || defaultSiteData.categories,
+          products: json.products || defaultSiteData.products,
+          hero: json.hero || defaultSiteData.hero,
+          contact: json.contact || defaultSiteData.contact,
+          seo: json.seo || defaultSiteData.seo,
+          users: json.users || defaultSiteData.users,
         })
       } catch (error) {
         console.error("Veri cekme hatasi:", error)
@@ -298,9 +197,8 @@ export function useSiteDataReadOnly() {
         setIsLoading(false)
       }
     }
-
     fetchData()
-  }, [supabase])
+  }, [])
 
   return { data, isLoading }
 }
