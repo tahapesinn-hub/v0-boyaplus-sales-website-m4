@@ -109,7 +109,7 @@ export function useSiteData() {
       images: product.images,
     })
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Urun guncelle
   const updateProduct = useCallback(async (id: string, product: Product) => {
@@ -127,13 +127,13 @@ export function useSiteData() {
       images: product.images,
     }).eq("id", id)
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Urun sil
   const deleteProduct = useCallback(async (id: string) => {
     const { error } = await supabase.from("products").delete().eq("id", id)
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Kategori ekle
   const addCategory = useCallback(async (category: Category) => {
@@ -142,7 +142,7 @@ export function useSiteData() {
       slug: category.slug,
     })
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Kategori guncelle
   const updateCategory = useCallback(async (id: string, category: Category) => {
@@ -151,13 +151,13 @@ export function useSiteData() {
       slug: category.slug,
     }).eq("id", id)
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Kategori sil
   const deleteCategory = useCallback(async (id: string) => {
     const { error } = await supabase.from("categories").delete().eq("id", id)
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Hero guncelle
   const updateHero = useCallback(async (hero: HeroContent) => {
@@ -165,7 +165,7 @@ export function useSiteData() {
       .from("site_settings")
       .upsert({ key: "hero", value: hero, updated_at: new Date().toISOString() }, { onConflict: "key" })
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Contact guncelle
   const updateContact = useCallback(async (contact: ContactInfo) => {
@@ -173,7 +173,7 @@ export function useSiteData() {
       .from("site_settings")
       .upsert({ key: "contact", value: contact, updated_at: new Date().toISOString() }, { onConflict: "key" })
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // SEO guncelle
   const updateSeo = useCallback(async (seo: SeoMeta) => {
@@ -181,7 +181,7 @@ export function useSiteData() {
       .from("site_settings")
       .upsert({ key: "seo", value: seo, updated_at: new Date().toISOString() }, { onConflict: "key" })
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Kullanici ekle
   const addUser = useCallback(async (user: AdminUser) => {
@@ -192,7 +192,7 @@ export function useSiteData() {
       role: user.role,
     })
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Kullanici guncelle
   const updateUser = useCallback(async (id: string, user: AdminUser) => {
@@ -203,13 +203,13 @@ export function useSiteData() {
       role: user.role,
     }).eq("id", id)
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Kullanici sil
   const deleteUser = useCallback(async (id: string) => {
     const { error } = await supabase.from("admin_users").delete().eq("id", id)
     if (!error) fetchData()
-  }, [fetchData])
+  }, [supabase, fetchData])
 
   // Sifirla (Supabase ile kullanildiginda sadece yeniden yukler)
   const resetToDefaults = useCallback(async () => {
