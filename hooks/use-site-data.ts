@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { 
   Product, 
@@ -13,9 +13,8 @@ import type {
 } from "@/lib/site-data"
 import { defaultSiteData } from "@/lib/site-data"
 
-const supabase = createClient()
-
 export function useSiteData() {
+  const supabase = useMemo(() => createClient(), [])
   const [data, setData] = useState<SiteData>(defaultSiteData)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -88,7 +87,7 @@ export function useSiteData() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [supabase])
 
   useEffect(() => {
     fetchData()
@@ -241,6 +240,7 @@ export function useSiteData() {
 export function useSiteDataReadOnly() {
   const [data, setData] = useState<SiteData>(defaultSiteData)
   const [isLoading, setIsLoading] = useState(true)
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -300,7 +300,7 @@ export function useSiteDataReadOnly() {
     }
 
     fetchData()
-  }, [])
+  }, [supabase])
 
   return { data, isLoading }
 }

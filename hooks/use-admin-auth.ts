@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { AdminUser } from "@/lib/site-data"
 
@@ -11,14 +11,13 @@ interface AuthState {
   currentUser: AdminUser | null
 }
 
-const supabase = createClient()
-
 export function useAdminAuth() {
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     currentUser: null,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     const checkAuth = async () => {
