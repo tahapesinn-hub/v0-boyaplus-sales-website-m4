@@ -46,7 +46,12 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <AdminHeader onLogout={logout} onReset={resetToDefaults} />
+      <AdminHeader 
+        onLogout={logout} 
+        onReset={resetToDefaults} 
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
       
       <div className="flex">
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
