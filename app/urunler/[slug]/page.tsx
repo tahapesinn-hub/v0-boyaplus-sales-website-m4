@@ -1,6 +1,6 @@
 "use client"
 
-import { notFound } from "next/navigation"
+import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
@@ -9,11 +9,8 @@ import { Button } from "@/components/ui/button"
 import { useSiteDataReadOnly } from "@/hooks/use-site-data"
 import { ArrowLeft, Check, Clock, Layers, MessageCircle, Phone } from "lucide-react"
 
-interface ProductPageProps {
-  params: { slug: string }
-}
-
-export default function ProductPage({ params }: ProductPageProps) {
+export default function ProductPage() {
+  const params = useParams<{ slug: string }>()
   const { data, isLoading } = useSiteDataReadOnly()
 
   if (isLoading) {
