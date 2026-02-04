@@ -3,16 +3,17 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LogOut, ExternalLink, RotateCcw, Menu, X, Package, Home, Phone, Search } from "lucide-react"
+import { LogOut, ExternalLink, RotateCcw, Menu, X, Package, Home, Phone, Search, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-type AdminTab = "products" | "hero" | "contact" | "seo"
+type AdminTab = "products" | "hero" | "contact" | "seo" | "users"
 
 interface AdminHeaderProps {
   onLogout: () => void
   onReset: () => void
   activeTab?: AdminTab
   onTabChange?: (tab: AdminTab) => void
+  currentUserName?: string
 }
 
 const menuItems = [
@@ -20,9 +21,10 @@ const menuItems = [
   { id: "hero" as AdminTab, label: "Ana Sayfa İçeriği", icon: Home },
   { id: "contact" as AdminTab, label: "İletişim Bilgileri", icon: Phone },
   { id: "seo" as AdminTab, label: "SEO Ayarları", icon: Search },
+  { id: "users" as AdminTab, label: "Kullanıcı Yönetimi", icon: Users },
 ]
 
-export function AdminHeader({ onLogout, onReset, activeTab, onTabChange }: AdminHeaderProps) {
+export function AdminHeader({ onLogout, onReset, activeTab, onTabChange, currentUserName }: AdminHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
@@ -45,6 +47,11 @@ export function AdminHeader({ onLogout, onReset, activeTab, onTabChange }: Admin
         </div>
         
         <div className="flex items-center gap-2">
+          {currentUserName && (
+            <span className="hidden md:block text-sm text-muted-foreground mr-2">
+              Merhaba, <span className="font-medium text-foreground">{currentUserName}</span>
+            </span>
+          )}
           <Button variant="outline" size="sm" asChild className="hidden sm:flex bg-transparent">
             <Link href="/" target="_blank">
               <ExternalLink className="w-4 h-4 mr-2" />

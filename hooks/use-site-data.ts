@@ -7,6 +7,7 @@ import {
   type HeroContent, 
   type ContactInfo, 
   type SeoMeta,
+  type AdminUser,
   defaultSiteData 
 } from "@/lib/site-data"
 
@@ -75,6 +76,25 @@ export function useSiteData() {
     saveData(newData)
   }, [data, saveData])
 
+  // Kullanıcı işlemleri
+  const addUser = useCallback((user: AdminUser) => {
+    const newUsers = [...(data.users || []), user]
+    const newData = { ...data, users: newUsers }
+    saveData(newData)
+  }, [data, saveData])
+
+  const updateUser = useCallback((id: string, user: AdminUser) => {
+    const newUsers = (data.users || []).map(u => u.id === id ? user : u)
+    const newData = { ...data, users: newUsers }
+    saveData(newData)
+  }, [data, saveData])
+
+  const deleteUser = useCallback((id: string) => {
+    const newUsers = (data.users || []).filter(u => u.id !== id)
+    const newData = { ...data, users: newUsers }
+    saveData(newData)
+  }, [data, saveData])
+
   // Tüm veriyi sıfırla
   const resetToDefaults = useCallback(() => {
     saveData(defaultSiteData)
@@ -90,6 +110,9 @@ export function useSiteData() {
     updateHero,
     updateContact,
     updateSeo,
+    addUser,
+    updateUser,
+    deleteUser,
     resetToDefaults,
   }
 }

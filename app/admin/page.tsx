@@ -10,11 +10,12 @@ import { ProductsManager } from "@/components/admin/products-manager"
 import { HeroManager } from "@/components/admin/hero-manager"
 import { ContactManager } from "@/components/admin/contact-manager"
 import { SeoManager } from "@/components/admin/seo-manager"
+import { UsersManager } from "@/components/admin/users-manager"
 
-type AdminTab = "products" | "hero" | "contact" | "seo"
+type AdminTab = "products" | "hero" | "contact" | "seo" | "users"
 
 export default function AdminPage() {
-  const { isAuthenticated, isLoading: authLoading, login, logout } = useAdminAuth()
+  const { isAuthenticated, currentUser, isLoading: authLoading, login, logout } = useAdminAuth()
   const { 
     data, 
     isLoading: dataLoading,
@@ -24,6 +25,9 @@ export default function AdminPage() {
     updateHero,
     updateContact,
     updateSeo,
+    addUser,
+    updateUser,
+    deleteUser,
     resetToDefaults,
   } = useSiteData()
   
@@ -44,6 +48,9 @@ export default function AdminPage() {
     return <AdminLogin onLogin={login} />
   }
 
+  // Kullanıcı listesi yoksa varsayılan kullanıcıları kullan
+  const users = data.users || []
+
   return (
     <div className="min-h-screen bg-muted/30">
       <AdminHeader 
@@ -51,6 +58,7 @@ export default function AdminPage() {
         onReset={resetToDefaults} 
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        currentUserName={currentUser?.name}
       />
       
       <div className="flex">
@@ -84,6 +92,16 @@ export default function AdminPage() {
             <SeoManager
               seo={data.seo}
               onUpdate={updateSeo}
+            />
+          )}
+          
+          {activeTab === "users" && (
+            <UsersManager
+              users={users}
+              currentUserId={currentUser?.id || ""}
+              onAdd={addUser}
+              onUpdate={updateUser}
+              onDelete={deleteUser}
             />
           )}
         </main>

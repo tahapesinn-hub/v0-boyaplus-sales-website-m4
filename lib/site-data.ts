@@ -1,5 +1,14 @@
 // Site genelinde kullanılacak veri tipleri ve varsayılan değerler
 
+export interface AdminUser {
+  id: string
+  username: string
+  password: string
+  name: string
+  role: "admin" | "editor"
+  createdAt: string
+}
+
 export interface Product {
   id: string
   name: string
@@ -45,6 +54,7 @@ export interface SiteData {
   hero: HeroContent
   contact: ContactInfo
   seo: SeoMeta
+  users: AdminUser[]
 }
 
 export const categories = [
@@ -187,9 +197,21 @@ export const defaultSeo: SeoMeta = {
   keywords: "boya, türk boya, iç cephe, dış cephe, premium boya, boyaplus",
 }
 
+export const defaultUsers: AdminUser[] = [
+  {
+    id: "1",
+    username: "admin",
+    password: "boyaplusadmin",
+    name: "Ana Yönetici",
+    role: "admin",
+    createdAt: new Date().toISOString(),
+  },
+]
+
 export const defaultSiteData: SiteData = {
   products: defaultProducts,
   hero: defaultHero,
   contact: defaultContact,
   seo: defaultSeo,
+  users: defaultUsers,
 }
