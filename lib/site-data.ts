@@ -27,7 +27,8 @@ export interface Product {
   dryingTime: string
   price: string
   colors?: string[]
-  image?: string
+  image?: string // Geriye uyumluluk için
+  images?: string[] // Çoklu görsel desteği (max 10)
 }
 
 export interface HeroContent {
