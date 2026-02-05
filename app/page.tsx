@@ -26,7 +26,7 @@ export default function HomePage() {
       <main className="flex-1">
         <HeroSection hero={data.hero} />
         <FeaturesSection />
-        <ProductsPreview products={data.products} />
+        <ProductsPreview products={data.products} categories={data.categories || []} />
         <CTASection contact={data.contact} />
       </main>
       <Footer contact={data.contact} />

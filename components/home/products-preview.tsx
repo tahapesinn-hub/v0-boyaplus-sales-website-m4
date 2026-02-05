@@ -1,10 +1,11 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
-import { type Product, categories } from "@/lib/site-data"
+import type { Product, Category } from "@/lib/site-data"
 
 interface ProductsPreviewProps {
   products: Product[]
+  categories: Category[]
 }
 
 const categoryDescriptions: Record<string, string> = {
@@ -14,9 +15,8 @@ const categoryDescriptions: Record<string, string> = {
   "metal": "Metal yüzeyleri koruyan pas önleyici profesyonel boyalar.",
 }
 
-export function ProductsPreview({ products }: ProductsPreviewProps) {
+export function ProductsPreview({ products, categories }: ProductsPreviewProps) {
   const productCategories = categories
-    .filter(cat => cat.slug !== "tumu")
     .slice(0, 3)
     .map(cat => ({
       title: cat.name,

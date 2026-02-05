@@ -18,13 +18,27 @@ export function ProductsGrid({ products }: ProductsGridProps) {
 }
 
 function ProductCard({ product }: { product: Product }) {
+  // Gorseli al (images varsa ilkini, yoksa image'i)
+  const productImage = product.images?.[0] || product.image
+  
   return (
     <div className="group bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow">
-      {/* Product Image Placeholder */}
-      <div className="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 relative">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-24 h-24 rounded-full bg-primary/30" />
-        </div>
+      {/* Product Image */}
+      <div className="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 relative overflow-hidden">
+        {productImage ? (
+          <img 
+            src={productImage} 
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none"
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full bg-primary/30" />
+          </div>
+        )}
         <div className="absolute top-4 left-4">
           <span className="inline-block px-3 py-1 bg-background/90 backdrop-blur-sm text-xs font-medium rounded-full text-foreground">
             {product.category}

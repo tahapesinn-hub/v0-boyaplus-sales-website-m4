@@ -10,11 +10,13 @@ import { ProductsManager } from "@/components/admin/products-manager"
 import { HeroManager } from "@/components/admin/hero-manager"
 import { ContactManager } from "@/components/admin/contact-manager"
 import { SeoManager } from "@/components/admin/seo-manager"
+import { UsersManager } from "@/components/admin/users-manager"
+import { CategoriesManager } from "@/components/admin/categories-manager"
 
-type AdminTab = "products" | "hero" | "contact" | "seo"
+type AdminTab = "products" | "categories" | "hero" | "contact" | "seo" | "users"
 
 export default function AdminPage() {
-  const { isAuthenticated, isLoading: authLoading, login, logout } = useAdminAuth()
+  const { isAuthenticated, currentUser, isLoading: authLoading, login, logout } = useAdminAuth()
   const { 
     data, 
     isLoading: dataLoading,
@@ -24,6 +26,12 @@ export default function AdminPage() {
     updateHero,
     updateContact,
     updateSeo,
+    addUser,
+    updateUser,
+    deleteUser,
+    addCategory,
+    updateCategory,
+    deleteCategory,
     resetToDefaults,
   } = useSiteData()
   
@@ -44,9 +52,18 @@ export default function AdminPage() {
     return <AdminLogin onLogin={login} />
   }
 
+  // Kullanıcı listesi yoksa varsayılan kullanıcıları kullan
+  const users = data.users || []
+
   return (
     <div className="min-h-screen bg-muted/30">
-      <AdminHeader onLogout={logout} onReset={resetToDefaults} />
+      <AdminHeader 
+        onLogout={logout} 
+        onReset={resetToDefaults} 
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        currentUserName={currentUser?.name}
+      />
       
       <div className="flex">
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -55,9 +72,19 @@ export default function AdminPage() {
           {activeTab === "products" && (
             <ProductsManager
               products={data.products}
+              categories={data.categories || []}
               onAdd={addProduct}
               onUpdate={updateProduct}
               onDelete={deleteProduct}
+            />
+          )}
+          
+          {activeTab === "categories" && (
+            <CategoriesManager
+              categories={data.categories || []}
+              onAdd={addCategory}
+              onUpdate={updateCategory}
+              onDelete={deleteCategory}
             />
           )}
           
@@ -79,6 +106,16 @@ export default function AdminPage() {
             <SeoManager
               seo={data.seo}
               onUpdate={updateSeo}
+            />
+          )}
+          
+          {activeTab === "users" && (
+            <UsersManager
+              users={users}
+              currentUserId={currentUser?.id || ""}
+              onAdd={addUser}
+              onUpdate={updateUser}
+              onDelete={deleteUser}
             />
           )}
         </main>

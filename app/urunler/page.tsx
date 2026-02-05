@@ -5,7 +5,6 @@ import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 import { ProductsGrid } from "@/components/products/products-grid"
 import { CategoryFilter } from "@/components/products/category-filter"
-import { categories } from "@/lib/site-data"
 import { useSiteDataReadOnly } from "@/hooks/use-site-data"
 import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
@@ -27,6 +26,12 @@ function ProductsContent() {
   const filteredProducts = categorySlug === "tumu" 
     ? data.products 
     : data.products.filter(p => p.categorySlug === categorySlug)
+
+  // Dinamik kategorileri "Tumu" ile birlikte olustur
+  const allCategories = [
+    { name: "Tümü", slug: "tumu" },
+    ...(data.categories || []).map(c => ({ name: c.name, slug: c.slug }))
+  ]
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -51,7 +56,7 @@ function ProductsContent() {
         <section className="py-12 md:py-16 bg-background">
           <div className="container mx-auto px-4 md:px-6">
             <CategoryFilter 
-              categories={categories} 
+              categories={allCategories} 
               activeCategory={categorySlug} 
             />
             
