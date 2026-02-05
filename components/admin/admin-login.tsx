@@ -108,7 +108,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
             </Button>
             
             <p className="text-xs text-center text-muted-foreground mt-4">
-              Varsayılan: admin / boyaplusadmin
+              Varsayılan: admin / boyaplus
             </p>
           </form>
         </CardContent>
