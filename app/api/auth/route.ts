@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       .select("*")
       .eq("username", username)
       .eq("password", password)
-      .single()
+      .maybeSingle()
 
     if (error || !data) {
       return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 401 })
