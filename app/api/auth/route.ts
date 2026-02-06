@@ -3,12 +3,22 @@ import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 })
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey)
     
-    const { username, password } = await request.json()
+    const body = await request.json()
+    const username = String(body.username || "").trim()
+    const password = String(body.password || "").trim()
+
+    if (!username || !password) {
+      return NextResponse.json({ success: false, error: "Missing credentials" }, { status: 400 })
+    }
     
     const { data, error } = await supabase
       .from("admin_users")
@@ -17,7 +27,11 @@ export async function POST(request: Request) {
       .eq("password", password)
       .maybeSingle()
 
-    if (error || !data) {
+    if (error) {
+      return NextResponse.json({ success: false, error: "Database error" }, { status: 500 })
+    }
+
+    if (!data) {
       return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 401 })
     }
 
@@ -31,7 +45,7 @@ export async function POST(request: Request) {
         createdAt: data.created_at,
       },
     })
-  } catch (error) {
+  } catch (err) {
     return NextResponse.json({ error: "Auth failed" }, { status: 500 })
   }
 }
