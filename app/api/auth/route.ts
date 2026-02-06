@@ -17,10 +17,7 @@ export async function POST(request: Request) {
       .eq("password", password)
       .maybeSingle()
 
-    console.log("[v0] Auth result:", { data, error })
-
     if (error || !data) {
-      console.log("[v0] Auth failed - error:", error, "data:", data)
       return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 401 })
     }
 
