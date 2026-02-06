@@ -32,18 +32,23 @@ export function useAdminAuth() {
     setIsLoading(false)
   }, [])
 
+  const [loginError, setLoginError] = useState("")
+
   const login = useCallback(async (username: string, password: string): Promise<boolean> => {
     try {
+      setLoginError("")
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       })
       
-      if (!res.ok) return false
-      
       const data = await res.json()
-      if (!data.success) return false
+      
+      if (!res.ok || !data.success) {
+        setLoginError(data.error || `HTTP ${res.status}`)
+        return false
+      }
 
       const newState: AuthState = {
         isAuthenticated: true,
@@ -52,7 +57,9 @@ export function useAdminAuth() {
       setAuthState(newState)
       localStorage.setItem(AUTH_KEY, JSON.stringify(newState))
       return true
-    } catch {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Network error"
+      setLoginError(msg)
       return false
     }
   }, [])
@@ -68,5 +75,6 @@ export function useAdminAuth() {
     isLoading,
     login,
     logout,
+    loginError,
   }
 }

@@ -16,7 +16,7 @@ import { CategoriesManager } from "@/components/admin/categories-manager"
 type AdminTab = "products" | "categories" | "hero" | "contact" | "seo" | "users"
 
 export default function AdminPage() {
-  const { isAuthenticated, currentUser, isLoading: authLoading, login, logout } = useAdminAuth()
+  const { isAuthenticated, currentUser, isLoading: authLoading, login, logout, loginError } = useAdminAuth()
   const { 
     data, 
     isLoading: dataLoading,
@@ -49,7 +49,7 @@ export default function AdminPage() {
   }
 
   if (!isAuthenticated) {
-    return <AdminLogin onLogin={login} />
+    return <AdminLogin onLogin={login} loginError={loginError} />
   }
 
   // Kullanıcı listesi yoksa varsayılan kullanıcıları kullan
