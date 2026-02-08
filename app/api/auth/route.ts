@@ -16,8 +16,6 @@ export async function POST(request: Request) {
     const username = String(body.username || "").trim()
     const password = String(body.password || "").trim()
 
-    console.log("[v0] Login attempt - username:", username, "password length:", password.length)
-
     if (!username || !password) {
       return NextResponse.json({ success: false, error: "MISSING_CREDS" }, { status: 400 })
     }
@@ -28,8 +26,6 @@ export async function POST(request: Request) {
       .eq("username", username)
       .eq("password", password)
       .maybeSingle()
-
-    console.log("[v0] Supabase result - data:", JSON.stringify(data), "error:", JSON.stringify(error))
 
     if (error) {
       return NextResponse.json({ success: false, error: "DB_ERROR: " + error.message }, { status: 500 })
@@ -51,7 +47,6 @@ export async function POST(request: Request) {
     })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown"
-    console.log("[v0] Auth catch error:", message)
     return NextResponse.json({ success: false, error: "CATCH_ERROR: " + message }, { status: 500 })
   }
 }
