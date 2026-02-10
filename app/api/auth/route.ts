@@ -3,12 +3,22 @@ import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json({ success: false, error: "DB_NOT_CONFIGURED" }, { status: 500 })
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey)
     
-    const { username, password } = await request.json()
+    const body = await request.json()
+    const username = String(body.username || "").trim()
+    const password = String(body.password || "").trim()
+
+    if (!username || !password) {
+      return NextResponse.json({ success: false, error: "MISSING_CREDS" }, { status: 400 })
+    }
     
     const { data, error } = await supabase
       .from("admin_users")
@@ -17,11 +27,12 @@ export async function POST(request: Request) {
       .eq("password", password)
       .maybeSingle()
 
-    console.log("[v0] Auth result:", { data, error })
+    if (error) {
+      return NextResponse.json({ success: false, error: "DB_ERROR: " + error.message }, { status: 500 })
+    }
 
-    if (error || !data) {
-      console.log("[v0] Auth failed - error:", error, "data:", data)
-      return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 401 })
+    if (!data) {
+      return NextResponse.json({ success: false, error: "NO_USER_FOUND" }, { status: 401 })
     }
 
     return NextResponse.json({
@@ -34,7 +45,8 @@ export async function POST(request: Request) {
         createdAt: data.created_at,
       },
     })
-  } catch (error) {
-    return NextResponse.json({ error: "Auth failed" }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown"
+    return NextResponse.json({ success: false, error: "CATCH_ERROR: " + message }, { status: 500 })
   }
 }

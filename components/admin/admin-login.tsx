@@ -10,9 +10,10 @@ import { Lock, AlertCircle, User, Loader2 } from "lucide-react"
 
 interface AdminLoginProps {
   onLogin: (username: string, password: string) => Promise<boolean>
+  loginError?: string
 }
 
-export function AdminLogin({ onLogin }: AdminLoginProps) {
+export function AdminLogin({ onLogin, loginError }: AdminLoginProps) {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState(false)
@@ -92,7 +93,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
             {error && (
               <div className="flex items-center gap-2 text-destructive text-sm">
                 <AlertCircle className="w-4 h-4" />
-                <span>Kullanıcı adı veya parola yanlış. Tekrar deneyin.</span>
+                <span>Giriş başarısız. {loginError && `(${loginError})`}</span>
               </div>
             )}
             

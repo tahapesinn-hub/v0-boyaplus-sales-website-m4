@@ -1,13 +1,16 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
 export async function POST(request: Request) {
   try {
+    const supabase = getSupabase()
     const product = await request.json()
     const { error } = await supabase.from("products").insert({
       name: product.name,
@@ -31,6 +34,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
+    const supabase = getSupabase()
     const { id, ...product } = await request.json()
     const { error } = await supabase.from("products").update({
       name: product.name,
@@ -54,6 +58,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const supabase = getSupabase()
     const { id } = await request.json()
     const { error } = await supabase.from("products").delete().eq("id", id)
     if (error) throw error
