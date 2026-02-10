@@ -1,31 +1,13 @@
-import { createClient } from "@supabase/supabase-js"
+import { sql } from "@/lib/db"
 import { NextResponse } from "next/server"
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 export async function POST(request: Request) {
   try {
-    const supabase = getSupabase()
-    const product = await request.json()
-    const { error } = await supabase.from("products").insert({
-      name: product.name,
-      slug: product.slug,
-      category: product.category,
-      category_slug: product.categorySlug,
-      description: product.description,
-      features: product.features,
-      coverage: product.coverage,
-      drying_time: product.dryingTime,
-      price: product.price,
-      colors: product.colors,
-      images: product.images,
-    })
-    if (error) throw error
+    const p = await request.json()
+    await sql`
+      INSERT INTO products (name, slug, category, category_slug, description, features, coverage, drying_time, price, colors, images)
+      VALUES (${p.name}, ${p.slug}, ${p.category}, ${p.categorySlug}, ${p.description}, ${JSON.stringify(p.features || [])}, ${p.coverage}, ${p.dryingTime}, ${p.price}, ${JSON.stringify(p.colors || [])}, ${JSON.stringify(p.images || [])})
+    `
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: "Failed to add product" }, { status: 500 })
@@ -34,22 +16,14 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = getSupabase()
-    const { id, ...product } = await request.json()
-    const { error } = await supabase.from("products").update({
-      name: product.name,
-      slug: product.slug,
-      category: product.category,
-      category_slug: product.categorySlug,
-      description: product.description,
-      features: product.features,
-      coverage: product.coverage,
-      drying_time: product.dryingTime,
-      price: product.price,
-      colors: product.colors,
-      images: product.images,
-    }).eq("id", id)
-    if (error) throw error
+    const { id, ...p } = await request.json()
+    await sql`
+      UPDATE products SET
+        name = ${p.name}, slug = ${p.slug}, category = ${p.category}, category_slug = ${p.categorySlug},
+        description = ${p.description}, features = ${JSON.stringify(p.features || [])}, coverage = ${p.coverage},
+        drying_time = ${p.dryingTime}, price = ${p.price}, colors = ${JSON.stringify(p.colors || [])}, images = ${JSON.stringify(p.images || [])}
+      WHERE id = ${id}
+    `
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: "Failed to update product" }, { status: 500 })
@@ -58,10 +32,8 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = getSupabase()
     const { id } = await request.json()
-    const { error } = await supabase.from("products").delete().eq("id", id)
-    if (error) throw error
+    await sql`DELETE FROM products WHERE id = ${id}`
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete product" }, { status: 500 })

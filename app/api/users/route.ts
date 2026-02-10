@@ -1,24 +1,10 @@
-import { createClient } from "@supabase/supabase-js"
+import { sql } from "@/lib/db"
 import { NextResponse } from "next/server"
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 export async function POST(request: Request) {
   try {
-    const supabase = getSupabase()
-    const user = await request.json()
-    const { error } = await supabase.from("admin_users").insert({
-      username: user.username,
-      password: user.password,
-      name: user.name,
-      role: user.role,
-    })
-    if (error) throw error
+    const u = await request.json()
+    await sql`INSERT INTO admin_users (username, password, name, role) VALUES (${u.username}, ${u.password}, ${u.name}, ${u.role})`
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: "Failed to add user" }, { status: 500 })
@@ -27,15 +13,8 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = getSupabase()
-    const { id, ...user } = await request.json()
-    const { error } = await supabase.from("admin_users").update({
-      username: user.username,
-      password: user.password,
-      name: user.name,
-      role: user.role,
-    }).eq("id", id)
-    if (error) throw error
+    const { id, ...u } = await request.json()
+    await sql`UPDATE admin_users SET username = ${u.username}, password = ${u.password}, name = ${u.name}, role = ${u.role} WHERE id = ${id}`
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: "Failed to update user" }, { status: 500 })
@@ -44,10 +23,8 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = getSupabase()
     const { id } = await request.json()
-    const { error } = await supabase.from("admin_users").delete().eq("id", id)
-    if (error) throw error
+    await sql`DELETE FROM admin_users WHERE id = ${id}`
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete user" }, { status: 500 })

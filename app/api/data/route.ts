@@ -1,21 +1,16 @@
-import { createClient } from "@supabase/supabase-js"
+import { sql } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    const [categoriesRes, productsRes, settingsRes, usersRes] = await Promise.all([
-      supabase.from("categories").select("*").order("created_at"),
-      supabase.from("products").select("*").order("created_at"),
-      supabase.from("site_settings").select("*"),
-      supabase.from("admin_users").select("*"),
+    const [categories, products, settings, users] = await Promise.all([
+      sql`SELECT * FROM categories ORDER BY created_at`,
+      sql`SELECT * FROM products ORDER BY created_at`,
+      sql`SELECT * FROM site_settings`,
+      sql`SELECT * FROM admin_users`,
     ])
 
-    const categories = categoriesRes.data || []
-    const products = (productsRes.data || []).map((p: Record<string, unknown>) => ({
+    const mappedProducts = products.map((p) => ({
       id: p.id,
       name: p.name,
       slug: p.slug,
@@ -30,12 +25,11 @@ export async function GET() {
       images: p.images || [],
     }))
 
-    const settings = settingsRes.data || []
-    const heroSetting = settings.find((s: Record<string, unknown>) => s.key === "hero")
-    const contactSetting = settings.find((s: Record<string, unknown>) => s.key === "contact")
-    const seoSetting = settings.find((s: Record<string, unknown>) => s.key === "seo")
+    const heroSetting = settings.find((s) => s.key === "hero")
+    const contactSetting = settings.find((s) => s.key === "contact")
+    const seoSetting = settings.find((s) => s.key === "seo")
 
-    const users = (usersRes.data || []).map((u: Record<string, unknown>) => ({
+    const mappedUsers = users.map((u) => ({
       id: u.id,
       username: u.username,
       password: u.password,
@@ -46,11 +40,11 @@ export async function GET() {
 
     return NextResponse.json({
       categories,
-      products,
+      products: mappedProducts,
       hero: heroSetting?.value || null,
       contact: contactSetting?.value || null,
       seo: seoSetting?.value || null,
-      users,
+      users: mappedUsers,
     })
   } catch (error) {
     console.error("Data fetch error:", error)

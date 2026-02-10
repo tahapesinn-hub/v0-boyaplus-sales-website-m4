@@ -1,17 +1,13 @@
-import { createClient } from "@supabase/supabase-js"
+import { sql } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function PUT(request: Request) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
     const { key, value } = await request.json()
-    const { error } = await supabase
-      .from("site_settings")
-      .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: "key" })
-    if (error) throw error
+    await sql`
+      INSERT INTO site_settings (key, value, updated_at) VALUES (${key}, ${JSON.stringify(value)}, NOW())
+      ON CONFLICT (key) DO UPDATE SET value = ${JSON.stringify(value)}, updated_at = NOW()
+    `
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: "Failed to update settings" }, { status: 500 })
