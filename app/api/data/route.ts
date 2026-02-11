@@ -1,16 +1,16 @@
-import { sql } from "@/lib/db"
+import { supabaseRest } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
     const [categories, products, settings, users] = await Promise.all([
-      sql`SELECT * FROM categories ORDER BY created_at`,
-      sql`SELECT * FROM products ORDER BY created_at`,
-      sql`SELECT * FROM site_settings`,
-      sql`SELECT * FROM admin_users`,
+      supabaseRest({ table: "categories", filters: { "order": "created_at.asc" } }),
+      supabaseRest({ table: "products", filters: { "order": "created_at.asc" } }),
+      supabaseRest({ table: "site_settings" }),
+      supabaseRest({ table: "admin_users" }),
     ])
 
-    const mappedProducts = products.map((p) => ({
+    const mappedProducts = (products || []).map((p: Record<string, unknown>) => ({
       id: p.id,
       name: p.name,
       slug: p.slug,
@@ -25,11 +25,12 @@ export async function GET() {
       images: p.images || [],
     }))
 
-    const heroSetting = settings.find((s) => s.key === "hero")
-    const contactSetting = settings.find((s) => s.key === "contact")
-    const seoSetting = settings.find((s) => s.key === "seo")
+    const settingsArr = settings || []
+    const heroSetting = settingsArr.find((s: Record<string, unknown>) => s.key === "hero")
+    const contactSetting = settingsArr.find((s: Record<string, unknown>) => s.key === "contact")
+    const seoSetting = settingsArr.find((s: Record<string, unknown>) => s.key === "seo")
 
-    const mappedUsers = users.map((u) => ({
+    const mappedUsers = (users || []).map((u: Record<string, unknown>) => ({
       id: u.id,
       username: u.username,
       password: u.password,
@@ -39,7 +40,7 @@ export async function GET() {
     }))
 
     return NextResponse.json({
-      categories,
+      categories: categories || [],
       products: mappedProducts,
       hero: heroSetting?.value || null,
       contact: contactSetting?.value || null,
@@ -47,7 +48,7 @@ export async function GET() {
       users: mappedUsers,
     })
   } catch (error) {
-    console.error("Data fetch error:", error)
-    return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 })
+    const message = error instanceof Error ? error.message : "Unknown"
+    return NextResponse.json({ error: "Failed to fetch data: " + message }, { status: 500 })
   }
 }

@@ -1,4 +1,4 @@
-import { sql } from "@/lib/db"
+import { supabaseRest } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
@@ -11,11 +11,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "MISSING_CREDS" }, { status: 400 })
     }
 
-    const users = await sql`
-      SELECT * FROM admin_users WHERE username = ${username} AND password = ${password} LIMIT 1
-    `
+    const users = await supabaseRest({
+      table: "admin_users",
+      filters: {
+        "username": `eq.${username}`,
+        "password": `eq.${password}`,
+      },
+    })
 
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
       return NextResponse.json({ success: false, error: "NO_USER_FOUND" }, { status: 401 })
     }
 
