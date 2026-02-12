@@ -1,21 +1,16 @@
-import { createClient } from "@supabase/supabase-js"
+import { supabaseRest } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    const [categoriesRes, productsRes, settingsRes, usersRes] = await Promise.all([
-      supabase.from("categories").select("*").order("created_at"),
-      supabase.from("products").select("*").order("created_at"),
-      supabase.from("site_settings").select("*"),
-      supabase.from("admin_users").select("*"),
+    const [categories, products, settings, users] = await Promise.all([
+      supabaseRest({ table: "categories", filters: { "order": "created_at.asc" } }),
+      supabaseRest({ table: "products", filters: { "order": "created_at.asc" } }),
+      supabaseRest({ table: "site_settings" }),
+      supabaseRest({ table: "admin_users" }),
     ])
 
-    const categories = categoriesRes.data || []
-    const products = (productsRes.data || []).map((p: Record<string, unknown>) => ({
+    const mappedProducts = (products || []).map((p: Record<string, unknown>) => ({
       id: p.id,
       name: p.name,
       slug: p.slug,
@@ -30,12 +25,12 @@ export async function GET() {
       images: p.images || [],
     }))
 
-    const settings = settingsRes.data || []
-    const heroSetting = settings.find((s: Record<string, unknown>) => s.key === "hero")
-    const contactSetting = settings.find((s: Record<string, unknown>) => s.key === "contact")
-    const seoSetting = settings.find((s: Record<string, unknown>) => s.key === "seo")
+    const settingsArr = settings || []
+    const heroSetting = settingsArr.find((s: Record<string, unknown>) => s.key === "hero")
+    const contactSetting = settingsArr.find((s: Record<string, unknown>) => s.key === "contact")
+    const seoSetting = settingsArr.find((s: Record<string, unknown>) => s.key === "seo")
 
-    const users = (usersRes.data || []).map((u: Record<string, unknown>) => ({
+    const mappedUsers = (users || []).map((u: Record<string, unknown>) => ({
       id: u.id,
       username: u.username,
       password: u.password,
@@ -45,15 +40,15 @@ export async function GET() {
     }))
 
     return NextResponse.json({
-      categories,
-      products,
+      categories: categories || [],
+      products: mappedProducts,
       hero: heroSetting?.value || null,
       contact: contactSetting?.value || null,
       seo: seoSetting?.value || null,
-      users,
+      users: mappedUsers,
     })
   } catch (error) {
-    console.error("Data fetch error:", error)
-    return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 })
+    const message = error instanceof Error ? error.message : "Unknown"
+    return NextResponse.json({ error: "Failed to fetch data: " + message }, { status: 500 })
   }
 }
