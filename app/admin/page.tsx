@@ -103,10 +103,7 @@ export default function AdminPage() {
           )}
           
           {activeTab === "seo" && (
-            <SeoManager
-              seo={data.seo}
-              onUpdate={updateSeo}
-            />
+            <SeoManager />
           )}
           
           {activeTab === "users" && (
