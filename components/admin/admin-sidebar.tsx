@@ -1,9 +1,9 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { Package, Home, Phone, Search, Users, FolderOpen } from "lucide-react"
+import { Package, Home, Phone, Search, Users, FolderOpen, Wrench } from "lucide-react"
 
-type AdminTab = "products" | "categories" | "hero" | "contact" | "seo" | "users"
+type AdminTab = "products" | "categories" | "hero" | "contact" | "services" | "seo" | "users"
 
 interface AdminSidebarProps {
   activeTab: AdminTab
@@ -15,6 +15,7 @@ const menuItems = [
   { id: "categories" as AdminTab, label: "Kategori Yönetimi", icon: FolderOpen },
   { id: "hero" as AdminTab, label: "Ana Sayfa İçeriği", icon: Home },
   { id: "contact" as AdminTab, label: "İletişim Bilgileri", icon: Phone },
+  { id: "services" as AdminTab, label: "Hizmet Yönetimi", icon: Wrench },
   { id: "seo" as AdminTab, label: "SEO Ayarları", icon: Search },
   { id: "users" as AdminTab, label: "Kullanıcı Yönetimi", icon: Users },
 ]

@@ -12,8 +12,9 @@ import { ContactManager } from "@/components/admin/contact-manager"
 import { SeoManager } from "@/components/admin/seo-manager"
 import { UsersManager } from "@/components/admin/users-manager"
 import { CategoriesManager } from "@/components/admin/categories-manager"
+import { ServicesManager } from "@/components/admin/services-manager"
 
-type AdminTab = "products" | "categories" | "hero" | "contact" | "seo" | "users"
+type AdminTab = "products" | "categories" | "hero" | "contact" | "services" | "seo" | "users"
 
 export default function AdminPage() {
   const { isAuthenticated, currentUser, isLoading: authLoading, login, logout, loginError } = useAdminAuth()
@@ -100,6 +101,10 @@ export default function AdminPage() {
               contact={data.contact}
               onUpdate={updateContact}
             />
+          )}
+          
+          {activeTab === "services" && (
+            <ServicesManager />
           )}
           
           {activeTab === "seo" && (

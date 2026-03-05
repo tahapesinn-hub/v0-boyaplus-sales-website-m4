@@ -20,11 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, Plus, Save, Trash2, Globe, FileText, ShoppingBag, Check } from "lucide-react"
+import { Search, Plus, Save, Trash2, Globe, FileText, ShoppingBag, Check, BookOpen, Wrench } from "lucide-react"
 
 interface SeoPage {
   id: string
-  page_type: "page" | "product"
+  page_type: "page" | "product" | "blog" | "service"
   page_key: string
   page_label: string
   title: string
@@ -58,7 +58,7 @@ export function SeoManager() {
   const [pages, setPages] = useState<SeoPage[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
-  const [filterType, setFilterType] = useState<"all" | "page" | "product">("all")
+  const [filterType, setFilterType] = useState<"all" | "page" | "product" | "blog" | "service">("all")
   const [selectedPage, setSelectedPage] = useState<SeoPage | null>(null)
   const [form, setForm] = useState<SeoForm>(emptyForm)
   const [saving, setSaving] = useState(false)
@@ -199,7 +199,7 @@ export function SeoManager() {
                 <Select
                   value={newForm.page_type}
                   onValueChange={(v) =>
-                    setNewForm({ ...newForm, page_type: v as "page" | "product" })
+                    setNewForm({ ...newForm, page_type: v as "page" | "product" | "blog" | "service" })
                   }
                 >
                   <SelectTrigger>
@@ -208,6 +208,8 @@ export function SeoManager() {
                   <SelectContent>
                     <SelectItem value="page">Sayfa</SelectItem>
                     <SelectItem value="product">Urun</SelectItem>
+                    <SelectItem value="blog">Blog</SelectItem>
+                    <SelectItem value="service">Hizmet</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -260,6 +262,8 @@ export function SeoManager() {
             <SelectItem value="all">Tum Sayfalar</SelectItem>
             <SelectItem value="page">Sayfalar</SelectItem>
             <SelectItem value="product">Urunler</SelectItem>
+            <SelectItem value="blog">Blog Yazilari</SelectItem>
+            <SelectItem value="service">Hizmetler</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -289,10 +293,17 @@ export function SeoManager() {
                     : "border-border hover:border-primary/50 bg-card"
                 }`}
               >
-                {page.page_type === "page" ? (
+                {page.page_type === "page" && (
                   <FileText className="w-4 h-4 text-blue-500 shrink-0" />
-                ) : (
+                )}
+                {page.page_type === "product" && (
                   <ShoppingBag className="w-4 h-4 text-orange-500 shrink-0" />
+                )}
+                {page.page_type === "blog" && (
+                  <BookOpen className="w-4 h-4 text-green-500 shrink-0" />
+                )}
+                {page.page_type === "service" && (
+                  <Wrench className="w-4 h-4 text-purple-500 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{page.page_label}</p>
