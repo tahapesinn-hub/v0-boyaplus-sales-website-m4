@@ -1,11 +1,17 @@
 import { supabaseRest } from "@/lib/db"
 import { NextResponse } from "next/server"
+import { defaultSiteData } from "@/lib/site-data"
 
 export async function GET() {
+  // Environment variable kontrolu
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return NextResponse.json(defaultSiteData)
+  }
+
   try {
     const [categories, products, settings, users] = await Promise.all([
-      supabaseRest({ table: "categories", filters: { "order": "created_at.asc" } }),
-      supabaseRest({ table: "products", filters: { "order": "created_at.asc" } }),
+      supabaseRest({ table: "categories", order: "created_at.asc" }),
+      supabaseRest({ table: "products", order: "created_at.asc" }),
       supabaseRest({ table: "site_settings" }),
       supabaseRest({ table: "admin_users" }),
     ])
@@ -48,7 +54,8 @@ export async function GET() {
       users: mappedUsers,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown"
-    return NextResponse.json({ error: "Failed to fetch data: " + message }, { status: 500 })
+    console.error("[v0] Data API error:", error)
+    // Hata durumunda varsayilan verileri don
+    return NextResponse.json(defaultSiteData)
   }
 }

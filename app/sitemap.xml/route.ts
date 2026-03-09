@@ -1,5 +1,4 @@
 import { supabaseRest } from "@/lib/db"
-import { blogPosts } from "@/lib/blog-data"
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
@@ -84,16 +83,28 @@ export async function GET() {
     // SEO sayfalari alinamazsa devam et
   }
 
-  // 4. Blog yazilarinin URL'leri
-  const blogUrls = blogPosts.map(
-    (post) => `
+  // 4. Veritabanindan blog URL'leri
+  let blogUrls: string[] = []
+  try {
+    const blogPosts = await supabaseRest({
+      table: "blog_posts",
+      select: "slug,created_at",
+      filters: { is_published: "eq.true" },
+    })
+    if (Array.isArray(blogPosts)) {
+      blogUrls = blogPosts.map(
+        (post: { slug: string; created_at: string }) => `
   <url>
     <loc>${SITE_URL}/blog/${post.slug}</loc>
-    <lastmod>${post.date}</lastmod>
+    <lastmod>${post.created_at ? new Date(post.created_at).toISOString().split("T")[0] : today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>`
-  )
+      )
+    }
+  } catch {
+    // Blog yazilari alinamazsa devam et
+  }
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

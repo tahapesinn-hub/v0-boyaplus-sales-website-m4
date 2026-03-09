@@ -3,10 +3,10 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LogOut, ExternalLink, RotateCcw, Menu, X, Package, Home, Phone, Search, Users, FolderOpen } from "lucide-react"
+import { LogOut, ExternalLink, RotateCcw, Menu, X, Package, Home, Phone, Search, Users, FolderOpen, Wrench, BookOpen, Palette } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-type AdminTab = "products" | "categories" | "hero" | "contact" | "seo" | "users"
+type AdminTab = "products" | "categories" | "hero" | "contact" | "services" | "blog" | "rooms" | "seo" | "users"
 
 interface AdminHeaderProps {
   onLogout: () => void
@@ -21,6 +21,9 @@ const menuItems = [
   { id: "categories" as AdminTab, label: "Kategori Yönetimi", icon: FolderOpen },
   { id: "hero" as AdminTab, label: "Ana Sayfa İçeriği", icon: Home },
   { id: "contact" as AdminTab, label: "İletişim Bilgileri", icon: Phone },
+  { id: "services" as AdminTab, label: "Hizmet Yönetimi", icon: Wrench },
+  { id: "blog" as AdminTab, label: "Blog Yönetimi", icon: BookOpen },
+  { id: "rooms" as AdminTab, label: "Renk Onerileri", icon: Palette },
   { id: "seo" as AdminTab, label: "SEO Ayarları", icon: Search },
   { id: "users" as AdminTab, label: "Kullanıcı Yönetimi", icon: Users },
 ]

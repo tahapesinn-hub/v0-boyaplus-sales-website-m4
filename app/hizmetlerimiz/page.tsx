@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import { supabaseRest } from "@/lib/db"
+import { getContactFallback } from "@/lib/site-data"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -40,7 +41,17 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Droplets,
 }
 
+const defaultServices: Service[] = [
+  { id: "1", name: "Ic Cephe Boyama", slug: "ic-cephe-boyama", description: "Evinizin ic mekanlarini profesyonel ekibimizle boyatarak yenilikci ve modern gorunume kavusturun.", icon: "Home", features: ["Renk danismanligi", "Zemin koruma", "Temiz calisma"], is_active: true, sort_order: 1 },
+  { id: "2", name: "Dis Cephe Boyama", slug: "dis-cephe-boyama", description: "Binanizin dis cephesini hava kosullarina dayanikli premium boyalarla koruma altina alin.", icon: "Shield", features: ["UV dayanimi", "Su yalitimi", "Iskeleli calisma"], is_active: true, sort_order: 2 },
+  { id: "3", name: "Ahsap Boyama", slug: "ahsap-boyama", description: "Ahsap yuzeyler icin ozel boya ve vernik uygulamalari.", icon: "Paintbrush", features: ["Ahsap koruma", "Vernik uygulama"], is_active: true, sort_order: 3 },
+]
+
 async function getServices(): Promise<Service[]> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return defaultServices
+  }
+
   try {
     const services = await supabaseRest({
       table: "services",
@@ -48,14 +59,15 @@ async function getServices(): Promise<Service[]> {
       filters: { is_active: "eq.true" },
       order: "sort_order.asc",
     })
-    return Array.isArray(services) ? services : []
+    return Array.isArray(services) && services.length > 0 ? services : defaultServices
   } catch {
-    return []
+    return defaultServices
   }
 }
 
 export default async function HizmetlerimizPage() {
   const services = await getServices()
+  const contact = getContactFallback()
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -144,7 +156,7 @@ export default async function HizmetlerimizPage() {
         </section>
       </main>
 
-      <Footer />
+      <Footer contact={contact} />
     </div>
   )
 }

@@ -177,23 +177,23 @@ export function SeoManager() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">SEO Yonetimi</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">SEO Yonetimi</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Sayfa ve urun SEO ayarlarini duzenleyin, sitemap kontrolu yapin.
           </p>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               Yeni Sayfa Ekle
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="w-[95vw] max-w-md p-4 sm:p-6">
             <DialogHeader>
               <DialogTitle>Yeni SEO Sayfasi Ekle</DialogTitle>
             </DialogHeader>
-            <div className="flex flex-col gap-4 pt-4">
+            <div className="flex flex-col gap-4 pt-2 sm:pt-4">
               <div className="flex flex-col gap-2">
                 <Label>Sayfa Tipi</Label>
                 <Select
@@ -202,7 +202,7 @@ export function SeoManager() {
                     setNewForm({ ...newForm, page_type: v as "page" | "product" | "blog" | "service" })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="text-base">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -219,6 +219,7 @@ export function SeoManager() {
                   value={newForm.page_key}
                   onChange={(e) => setNewForm({ ...newForm, page_key: e.target.value })}
                   placeholder="/urunler/boya-adi"
+                  className="text-base"
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -227,6 +228,7 @@ export function SeoManager() {
                   value={newForm.page_label}
                   onChange={(e) => setNewForm({ ...newForm, page_label: e.target.value })}
                   placeholder="Boya Adi Detay"
+                  className="text-base"
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -235,9 +237,10 @@ export function SeoManager() {
                   value={newForm.title}
                   onChange={(e) => setNewForm({ ...newForm, title: e.target.value })}
                   placeholder="Sayfa Basligi | Boyaplus"
+                  className="text-base"
                 />
               </div>
-              <Button onClick={handleAdd}>Ekle</Button>
+              <Button onClick={handleAdd} className="w-full">Ekle</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -275,19 +278,19 @@ export function SeoManager() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Page List */}
         <div className="lg:col-span-1 flex flex-col gap-2">
-          <p className="text-sm font-medium text-muted-foreground mb-1">
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">
             {filtered.length} sayfa bulundu
           </p>
-          <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1">
+          <div className="flex flex-col gap-2 max-h-[300px] sm:max-h-[600px] overflow-y-auto pr-1">
             {filtered.map((page) => (
               <button
                 key={page.id}
                 type="button"
                 onClick={() => setSelectedPage(page)}
-                className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-colors ${
+                className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg border text-left transition-colors ${
                   selectedPage?.id === page.id
                     ? "border-primary bg-primary/5"
                     : "border-border hover:border-primary/50 bg-card"
@@ -306,7 +309,7 @@ export function SeoManager() {
                   <Wrench className="w-4 h-4 text-purple-500 shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{page.page_label}</p>
+                  <p className="text-xs sm:text-sm font-medium text-foreground truncate">{page.page_label}</p>
                   <p className="text-xs text-muted-foreground truncate">{page.page_key}</p>
                 </div>
                 {page.robots === "noindex" && (
@@ -326,10 +329,10 @@ export function SeoManager() {
         <div className="lg:col-span-2">
           {selectedPage ? (
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <div>
-                  <CardTitle className="text-lg">{selectedPage.page_label}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{selectedPage.page_key}</p>
+              <CardHeader className="flex flex-row items-center justify-between pb-4 p-4 sm:p-6">
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="text-base sm:text-lg truncate">{selectedPage.page_label}</CardTitle>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{selectedPage.page_key}</p>
                 </div>
                 <Button
                   variant="outline"
@@ -340,7 +343,7 @@ export function SeoManager() {
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </CardHeader>
-              <CardContent className="flex flex-col gap-5">
+              <CardContent className="flex flex-col gap-4 sm:gap-5 p-4 sm:p-6 pt-0 sm:pt-0">
                 {/* Title */}
                 <div className="flex flex-col gap-2">
                   <Label>Sayfa Basligi (Title Tag)</Label>
@@ -348,6 +351,7 @@ export function SeoManager() {
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
                     placeholder="Sayfa Basligi | Boyaplus"
+                    className="text-base"
                   />
                   <p className={`text-xs ${titleLength > 60 ? "text-red-500" : "text-muted-foreground"}`}>
                     {titleLength}/60 karakter (Onerilen: 50-60)
@@ -362,6 +366,7 @@ export function SeoManager() {
                     onChange={(e) => setForm({ ...form, meta_description: e.target.value })}
                     placeholder="Sayfa hakkinda kisa aciklama..."
                     rows={3}
+                    className="text-base"
                   />
                   <p className={`text-xs ${descLength > 160 ? "text-red-500" : "text-muted-foreground"}`}>
                     {descLength}/160 karakter (Onerilen: 120-160)
@@ -375,6 +380,7 @@ export function SeoManager() {
                     value={form.keywords}
                     onChange={(e) => setForm({ ...form, keywords: e.target.value })}
                     placeholder="boya, ic cephe, dis cephe, boyaplus"
+                    className="text-base"
                   />
                   <p className="text-xs text-muted-foreground">Virgul ile ayirin</p>
                 </div>
@@ -387,6 +393,7 @@ export function SeoManager() {
                       value={form.h1}
                       onChange={(e) => setForm({ ...form, h1: e.target.value })}
                       placeholder="Ana baslik"
+                      className="text-base"
                     />
                   </div>
                   <div className="flex flex-col gap-2">
@@ -395,6 +402,7 @@ export function SeoManager() {
                       value={form.h2}
                       onChange={(e) => setForm({ ...form, h2: e.target.value })}
                       placeholder="Alt baslik"
+                      className="text-base"
                     />
                   </div>
                 </div>
@@ -406,6 +414,7 @@ export function SeoManager() {
                     value={form.canonical_url}
                     onChange={(e) => setForm({ ...form, canonical_url: e.target.value })}
                     placeholder="https://boyaplus.com/urunler"
+                    className="text-base"
                   />
                 </div>
 
@@ -463,14 +472,14 @@ export function SeoManager() {
                 </div>
 
                 {/* Save */}
-                <div className="flex items-center justify-between pt-2 border-t border-border">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t border-border">
                   <p className="text-xs text-muted-foreground">
                     Son guncelleme:{" "}
                     {selectedPage.updated_at
                       ? new Date(selectedPage.updated_at).toLocaleString("tr-TR")
                       : "-"}
                   </p>
-                  <Button onClick={handleSave} disabled={saving}>
+                  <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
                     <Save className="w-4 h-4 mr-2" />
                     {saving ? "Kaydediliyor..." : "Kaydet"}
                   </Button>

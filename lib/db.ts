@@ -1,5 +1,5 @@
-const SUPABASE_URL = () => process.env.NEXT_PUBLIC_SUPABASE_URL!
-const SUPABASE_KEY = () => process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const SUPABASE_URL = () => process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+const SUPABASE_KEY = () => process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
 
 interface QueryOptions {
   table: string
@@ -9,10 +9,18 @@ interface QueryOptions {
   method?: "GET" | "POST" | "PATCH" | "DELETE"
   upsert?: boolean
   single?: boolean
+  order?: string
 }
 
-export async function supabaseRest({ table, select = "*", filters = {}, body, method = "GET", upsert = false, single = false }: QueryOptions) {
-  const url = new URL(`${SUPABASE_URL()}/rest/v1/${table}`)
+export async function supabaseRest({ table, select = "*", filters = {}, body, method = "GET", upsert = false, single = false, order }: QueryOptions) {
+  const supabaseUrl = SUPABASE_URL()
+  const supabaseKey = SUPABASE_KEY()
+  
+  if (!supabaseUrl || !supabaseKey) {
+    return null
+  }
+
+  const url = new URL(`${supabaseUrl}/rest/v1/${table}`)
   
   if (method === "GET") {
     url.searchParams.set("select", select)
@@ -22,9 +30,13 @@ export async function supabaseRest({ table, select = "*", filters = {}, body, me
     url.searchParams.set(key, value)
   }
 
+  if (order) {
+    url.searchParams.set("order", order)
+  }
+
   const headers: Record<string, string> = {
-    "apikey": SUPABASE_KEY(),
-    "Authorization": `Bearer ${SUPABASE_KEY()}`,
+    "apikey": supabaseKey,
+    "Authorization": `Bearer ${supabaseKey}`,
     "Content-Type": "application/json",
   }
 

@@ -6,6 +6,7 @@ import { WhatsAppButton } from "@/components/whatsapp-button"
 import { HeroSection } from "@/components/home/hero-section"
 import { FeaturesSection } from "@/components/home/features-section"
 import { ProductsPreview } from "@/components/home/products-preview"
+import { RoomColorsSection } from "@/components/home/room-colors-section"
 import { CTASection } from "@/components/home/cta-section"
 import { useSiteDataReadOnly } from "@/hooks/use-site-data"
 
@@ -14,7 +15,7 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     )
@@ -27,6 +28,7 @@ export default function HomePage() {
         <HeroSection hero={data.hero} />
         <FeaturesSection />
         <ProductsPreview products={data.products} categories={data.categories || []} />
+        <RoomColorsSection />
         <CTASection contact={data.contact} />
       </main>
       <Footer contact={data.contact} />

@@ -2,9 +2,10 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { BlogCard } from "@/components/blog/blog-card"
-import { blogPosts } from "@/lib/blog-data"
 import { getContactFallback } from "@/lib/site-data"
+import { supabaseRest } from "@/lib/db"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Clock, ArrowRight } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Blog - Boya Rehberi ve Uzman Ipuclari",
@@ -19,8 +20,39 @@ export const metadata: Metadata = {
   },
 }
 
-export default function BlogPage() {
+interface BlogPost {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  category: string
+  author: string
+  read_time: number
+  created_at: string
+  is_published: boolean
+}
+
+async function getBlogPosts(): Promise<BlogPost[]> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return []
+  }
+
+  try {
+    const posts = await supabaseRest({
+      table: "blog_posts",
+      select: "id,title,slug,excerpt,category,author,read_time,created_at,is_published",
+      filters: { is_published: "eq.true" },
+      order: "created_at.desc",
+    })
+    return Array.isArray(posts) ? posts : []
+  } catch {
+    return []
+  }
+}
+
+export default async function BlogPage() {
   const contact = getContactFallback()
+  const posts = await getBlogPosts()
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -44,11 +76,51 @@ export default function BlogPage() {
         {/* Blog Grid */}
         <section className="py-12 md:py-16 bg-background">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {blogPosts.map((post) => (
-                <BlogCard key={post.slug} post={post} />
-              ))}
-            </div>
+            {posts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Henuz blog yazisi bulunmuyor.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {posts.map((post) => (
+                  <Card key={post.slug} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded">
+                          {post.category}
+                        </span>
+                        <span className="flex items-center text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {post.read_time} dk
+                        </span>
+                      </div>
+                      <Link href={`/blog/${post.slug}`}>
+                        <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                          {post.title}
+                        </h3>
+                      </Link>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                        {post.excerpt}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(post.created_at).toLocaleDateString("tr-TR")}
+                        </span>
+                        <Link
+                          href={`/blog/${post.slug}`}
+                          className="text-sm font-medium text-primary hover:underline inline-flex items-center"
+                        >
+                          Devamini Oku
+                          <ArrowRight className="w-3 h-3 ml-1" />
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
 
             {/* CTA */}
             <div className="mt-16 text-center p-8 rounded-2xl bg-muted/50 border border-border">

@@ -1,38 +1,86 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import Script from "next/script"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { BlogContent } from "@/components/blog/blog-content"
-import { getBlogPost, blogPosts } from "@/lib/blog-data"
 import { getContactFallback } from "@/lib/site-data"
+import { supabaseRest } from "@/lib/db"
 import { ArrowLeft, Clock, Calendar, User } from "lucide-react"
 
 const SITE_URL = "https://www.boyaplus.com.tr"
+
+interface BlogPost {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  content: string
+  category: string
+  author: string
+  read_time: number
+  created_at: string
+  updated_at: string
+  is_published: boolean
+}
 
 interface Props {
   params: Promise<{ slug: string }>
 }
 
+async function getBlogPost(slug: string): Promise<BlogPost | null> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return null
+  }
+
+  try {
+    const posts = await supabaseRest({
+      table: "blog_posts",
+      select: "*",
+      filters: { slug: `eq.${slug}`, is_published: "eq.true" },
+    })
+    return Array.isArray(posts) && posts.length > 0 ? posts[0] : null
+  } catch {
+    return null
+  }
+}
+
+async function getRelatedPosts(currentSlug: string): Promise<BlogPost[]> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    return []
+  }
+
+  try {
+    const posts = await supabaseRest({
+      table: "blog_posts",
+      select: "id,title,slug,excerpt,category",
+      filters: { is_published: "eq.true" },
+      order: "created_at.desc",
+    })
+    return Array.isArray(posts) ? posts.filter((p: BlogPost) => p.slug !== currentSlug).slice(0, 3) : []
+  } catch {
+    return []
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const post = getBlogPost(slug)
+  const post = await getBlogPost(slug)
   if (!post) return {}
 
   return {
     title: post.title,
-    description: post.metaDescription,
-    keywords: post.tags,
+    description: post.excerpt,
     alternates: {
       canonical: `${SITE_URL}/blog/${post.slug}`,
     },
     openGraph: {
       title: post.title,
-      description: post.metaDescription,
+      description: post.excerpt,
       url: `${SITE_URL}/blog/${post.slug}`,
       type: "article",
-      publishedTime: post.publishedAt,
-      modifiedTime: post.updatedAt,
+      publishedTime: post.created_at,
+      modifiedTime: post.updated_at,
       authors: [post.author],
       locale: "tr_TR",
       siteName: "Boyaplus",
@@ -40,30 +88,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: post.title,
-      description: post.metaDescription,
+      description: post.excerpt,
     },
   }
 }
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params
-  const post = getBlogPost(slug)
+  const post = await getBlogPost(slug)
 
   if (!post) {
     notFound()
   }
 
   const contact = getContactFallback()
-
-  // Diger blog yazilari (mevcut yazi haric)
-  const relatedPosts = blogPosts.filter((p) => p.slug !== post.slug).slice(0, 3)
+  const relatedPosts = await getRelatedPosts(slug)
 
   // schema.org Article structured data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
-    description: post.metaDescription,
+    description: post.excerpt,
     author: {
       "@type": "Organization",
       name: post.author,
@@ -74,19 +120,21 @@ export default async function BlogPostPage({ params }: Props) {
       name: "Boyaplus",
       url: SITE_URL,
     },
-    datePublished: post.publishedAt,
-    dateModified: post.updatedAt,
+    datePublished: post.created_at,
+    dateModified: post.updated_at,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": `${SITE_URL}/blog/${post.slug}`,
     },
-    keywords: post.tags.join(", "),
+    keywords: post.category,
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <script
+      <Script
+        id="article-schema"
         type="application/ld+json"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Header />
@@ -139,8 +187,8 @@ export default async function BlogPostPage({ params }: Props) {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-4 h-4" />
-                    <time dateTime={post.publishedAt}>
-                      {new Date(post.publishedAt).toLocaleDateString("tr-TR", {
+                    <time dateTime={post.created_at}>
+                      {new Date(post.created_at).toLocaleDateString("tr-TR", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
@@ -149,13 +197,17 @@ export default async function BlogPostPage({ params }: Props) {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Clock className="w-4 h-4" />
-                    {post.readingTime} okuma
+                    {post.read_time} dk okuma
                   </span>
                 </div>
               </header>
 
               {/* Article Content */}
-              <BlogContent sections={post.content} />
+              <div className="prose prose-lg max-w-none">
+                <div className="text-foreground leading-relaxed whitespace-pre-wrap">
+                  {post.content}
+                </div>
+              </div>
 
               {/* Internal Links - Urunler ve Ana Sayfa */}
               <div className="mt-12 p-6 rounded-xl bg-muted/50 border border-border space-y-4">
@@ -180,13 +232,11 @@ export default async function BlogPostPage({ params }: Props) {
                 </div>
               </div>
 
-              {/* Tags */}
-              <div className="mt-8 flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <span key={tag} className="px-3 py-1 bg-muted text-muted-foreground text-xs rounded-full">
-                    {tag}
-                  </span>
-                ))}
+              {/* Category Tag */}
+              <div className="mt-8">
+                <span className="px-3 py-1 bg-muted text-muted-foreground text-xs rounded-full">
+                  {post.category}
+                </span>
               </div>
             </div>
           </div>
