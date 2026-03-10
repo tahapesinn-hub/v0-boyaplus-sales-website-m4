@@ -12,8 +12,11 @@ import { ContactManager } from "@/components/admin/contact-manager"
 import { SeoManager } from "@/components/admin/seo-manager"
 import { UsersManager } from "@/components/admin/users-manager"
 import { CategoriesManager } from "@/components/admin/categories-manager"
+import { ServicesManager } from "@/components/admin/services-manager"
+import { BlogManager } from "@/components/admin/blog-manager"
+import { RoomSuggestionsManager } from "@/components/admin/room-suggestions-manager"
 
-type AdminTab = "products" | "categories" | "hero" | "contact" | "seo" | "users"
+type AdminTab = "products" | "categories" | "hero" | "contact" | "services" | "blog" | "rooms" | "seo" | "users"
 
 export default function AdminPage() {
   const { isAuthenticated, currentUser, isLoading: authLoading, login, logout, loginError } = useAdminAuth()
@@ -68,7 +71,7 @@ export default function AdminPage() {
       <div className="flex">
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           {activeTab === "products" && (
             <ProductsManager
               products={data.products}
@@ -100,6 +103,18 @@ export default function AdminPage() {
               contact={data.contact}
               onUpdate={updateContact}
             />
+          )}
+          
+          {activeTab === "services" && (
+            <ServicesManager />
+          )}
+          
+          {activeTab === "blog" && (
+            <BlogManager />
+          )}
+          
+          {activeTab === "rooms" && (
+            <RoomSuggestionsManager />
           )}
           
           {activeTab === "seo" && (

@@ -35,6 +35,12 @@ export function Footer({ contact }: FooterProps) {
               <Link href="/urunler" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Ürünler
               </Link>
+              <Link href="/hizmetlerimiz" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Hizmetlerimiz
+              </Link>
+              <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Blog
+              </Link>
               <Link href="/iletisim" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 İletişim
               </Link>

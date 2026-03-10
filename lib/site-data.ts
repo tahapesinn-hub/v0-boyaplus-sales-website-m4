@@ -213,6 +213,10 @@ export const defaultUsers: AdminUser[] = [
   },
 ]
 
+export function getContactFallback(): ContactInfo {
+  return defaultContact
+}
+
 export const defaultSiteData: SiteData = {
   products: defaultProducts,
   categories: defaultCategories,
