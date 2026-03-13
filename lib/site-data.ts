@@ -1,5 +1,20 @@
 // Site genelinde kullanılacak veri tipleri ve varsayılan değerler
 
+export interface AdminUser {
+  id: string
+  username: string
+  password: string
+  name: string
+  role: "admin" | "editor"
+  createdAt: string
+}
+
+export interface Category {
+  id: string
+  name: string
+  slug: string
+}
+
 export interface Product {
   id: string
   name: string
@@ -12,14 +27,15 @@ export interface Product {
   dryingTime: string
   price: string
   colors?: string[]
-  image?: string
+  image?: string // Geriye uyumluluk için
+  images?: string[] // Çoklu görsel desteği (max 10)
 }
 
 export interface HeroContent {
   title: string
   subtitle: string
-  buttonText: string
-  buttonLink: string
+  ctaText: string
+  ctaSecondaryText: string
 }
 
 export interface ContactInfo {
@@ -27,11 +43,7 @@ export interface ContactInfo {
   whatsapp: string
   email: string
   address: string
-  workingHours: {
-    weekdays: string
-    saturday: string
-    sunday: string
-  }
+  workingHours: string
 }
 
 export interface SeoMeta {
@@ -42,17 +54,24 @@ export interface SeoMeta {
 
 export interface SiteData {
   products: Product[]
+  categories: Category[]
   hero: HeroContent
   contact: ContactInfo
   seo: SeoMeta
+  users: AdminUser[]
 }
 
+export const defaultCategories: Category[] = [
+  { id: "1", name: "İç Cephe Boyaları", slug: "ic-cephe" },
+  { id: "2", name: "Dış Cephe Boyaları", slug: "dis-cephe" },
+  { id: "3", name: "Ahşap Boyaları", slug: "ahsap" },
+  { id: "4", name: "Metal Boyaları", slug: "metal" },
+]
+
+// Geriye uyumluluk için
 export const categories = [
   { name: "Tümü", slug: "tumu" },
-  { name: "İç Cephe Boyaları", slug: "ic-cephe" },
-  { name: "Dış Cephe Boyaları", slug: "dis-cephe" },
-  { name: "Ahşap Boyaları", slug: "ahsap" },
-  { name: "Metal Boyaları", slug: "metal" },
+  ...defaultCategories.map(c => ({ name: c.name, slug: c.slug }))
 ]
 
 export const defaultProducts: Product[] = [
@@ -165,8 +184,8 @@ export const defaultProducts: Product[] = [
 export const defaultHero: HeroContent = {
   title: "Mekanlarınıza Renk ve Hayat Katın",
   subtitle: "Boyaplus ile premium kalite iç ve dış cephe boyaları. 25 yıllık tecrübemizle projeleriniz için en iyi çözümleri sunuyoruz.",
-  buttonText: "Ürünleri Keşfet",
-  buttonLink: "/urunler",
+  ctaText: "Ürünleri Keşfet",
+  ctaSecondaryText: "İletişime Geç",
 }
 
 export const defaultContact: ContactInfo = {
@@ -174,11 +193,7 @@ export const defaultContact: ContactInfo = {
   whatsapp: "905551234567",
   email: "info@boyaplus.com",
   address: "Organize Sanayi Bölgesi, 5. Cadde No: 42, Pendik, İstanbul",
-  workingHours: {
-    weekdays: "Pazartesi - Cuma: 08:00 - 18:00",
-    saturday: "Cumartesi: 09:00 - 14:00",
-    sunday: "Pazar: Kapalı",
-  },
+  workingHours: "Pazartesi - Cumartesi: 09:00 - 18:00",
 }
 
 export const defaultSeo: SeoMeta = {
@@ -187,9 +202,26 @@ export const defaultSeo: SeoMeta = {
   keywords: "boya, türk boya, iç cephe, dış cephe, premium boya, boyaplus",
 }
 
+export const defaultUsers: AdminUser[] = [
+  {
+    id: "1",
+    username: "admin",
+    password: "boyaplusadmin",
+    name: "Ana Yönetici",
+    role: "admin",
+    createdAt: new Date().toISOString(),
+  },
+]
+
+export function getContactFallback(): ContactInfo {
+  return defaultContact
+}
+
 export const defaultSiteData: SiteData = {
   products: defaultProducts,
+  categories: defaultCategories,
   hero: defaultHero,
   contact: defaultContact,
   seo: defaultSeo,
+  users: defaultUsers,
 }

@@ -1,20 +1,20 @@
 "use client"
 
-import { notFound } from "next/navigation"
+import { useState } from "react"
+import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 import { Button } from "@/components/ui/button"
 import { useSiteDataReadOnly } from "@/hooks/use-site-data"
-import { ArrowLeft, Check, Clock, Layers, MessageCircle, Phone } from "lucide-react"
+import { ArrowLeft, Check, Clock, Layers, MessageCircle, Phone, ChevronLeft, ChevronRight } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-interface ProductPageProps {
-  params: { slug: string }
-}
-
-export default function ProductPage({ params }: ProductPageProps) {
+export default function ProductPage() {
+  const params = useParams<{ slug: string }>()
   const { data, isLoading } = useSiteDataReadOnly()
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
 
   if (isLoading) {
     return (
@@ -30,7 +30,19 @@ export default function ProductPage({ params }: ProductPageProps) {
     notFound()
   }
 
+  // Görselleri al (images varsa onu, yoksa image'ı array olarak)
+  const images = product.images?.length ? product.images : (product.image ? [product.image] : [])
+  const hasImages = images.length > 0
+
   const whatsappMessage = `Merhaba, ${product.name} ürünü hakkında bilgi almak istiyorum.`
+
+  const handlePrevImage = () => {
+    setActiveImageIndex(prev => (prev === 0 ? images.length - 1 : prev - 1))
+  }
+
+  const handleNextImage = () => {
+    setActiveImageIndex(prev => (prev === images.length - 1 ? 0 : prev + 1))
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -65,16 +77,82 @@ export default function ProductPage({ params }: ProductPageProps) {
             </Link>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Product Image */}
-              <div className="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl relative overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-48 h-48 rounded-full bg-primary/30" />
+              {/* Product Image Gallery */}
+              <div className="space-y-4">
+                {/* Ana Görsel */}
+                <div className="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl relative overflow-hidden">
+                  {hasImages ? (
+                    <>
+                      <img 
+                        src={images[activeImageIndex]} 
+                        alt={`${product.name} - Görsel ${activeImageIndex + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none"
+                        }}
+                      />
+                      {/* Navigasyon oklari */}
+                      {images.length > 1 && (
+                        <>
+                          <button
+                            onClick={handlePrevImage}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center hover:bg-background transition-colors"
+                            aria-label="Önceki görsel"
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={handleNextImage}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center hover:bg-background transition-colors"
+                            aria-label="Sonraki görsel"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </button>
+                          {/* Gorsel sayaci */}
+                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-background/80 backdrop-blur-sm rounded-full text-sm">
+                            {activeImageIndex + 1} / {images.length}
+                          </div>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-48 h-48 rounded-full bg-primary/30" />
+                    </div>
+                  )}
+                  <div className="absolute top-6 left-6">
+                    <span className="inline-block px-4 py-2 bg-background/90 backdrop-blur-sm text-sm font-medium rounded-full text-foreground">
+                      {product.category}
+                    </span>
+                  </div>
                 </div>
-                <div className="absolute top-6 left-6">
-                  <span className="inline-block px-4 py-2 bg-background/90 backdrop-blur-sm text-sm font-medium rounded-full text-foreground">
-                    {product.category}
-                  </span>
-                </div>
+
+                {/* Thumbnail Görseller */}
+                {images.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {images.map((img, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setActiveImageIndex(index)}
+                        className={cn(
+                          "w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all",
+                          activeImageIndex === index 
+                            ? "border-primary ring-2 ring-primary/20" 
+                            : "border-border hover:border-muted-foreground"
+                        )}
+                      >
+                        <img 
+                          src={img} 
+                          alt={`${product.name} - Küçük görsel ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none"
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Product Info */}

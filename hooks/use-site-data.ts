@@ -1,115 +1,235 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { 
-  type SiteData, 
-  type Product, 
-  type HeroContent, 
-  type ContactInfo, 
-  type SeoMeta,
-  defaultSiteData 
+import type { 
+  Product, 
+  Category, 
+  HeroContent, 
+  ContactInfo, 
+  SeoMeta,
+  AdminUser,
+  SiteData
 } from "@/lib/site-data"
-
-const STORAGE_KEY = "boyaplus_site_data"
+import { defaultSiteData } from "@/lib/site-data"
 
 export function useSiteData() {
   const [data, setData] = useState<SiteData>(defaultSiteData)
   const [isLoading, setIsLoading] = useState(true)
 
-  // localStorage'dan veri yükle
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as SiteData
-        setData(parsed)
-      } catch {
+  const fetchData = useCallback(async () => {
+    try {
+      const res = await fetch("/api/data")
+      if (!res.ok) {
         setData(defaultSiteData)
+        return
       }
+      const json = await res.json()
+      
+      // API'den gelen verileri veya varsayilanlari kullan
+      const categories = Array.isArray(json.categories) && json.categories.length > 0 
+        ? json.categories 
+        : defaultSiteData.categories
+      const products = Array.isArray(json.products) && json.products.length > 0 
+        ? json.products 
+        : defaultSiteData.products
+      const hero = json.hero && typeof json.hero === 'object' && json.hero.title 
+        ? json.hero 
+        : defaultSiteData.hero
+      const contact = json.contact && typeof json.contact === 'object' && json.contact.phone 
+        ? json.contact 
+        : defaultSiteData.contact
+      const seo = json.seo && typeof json.seo === 'object' 
+        ? json.seo 
+        : defaultSiteData.seo
+      const users = Array.isArray(json.users) 
+        ? json.users 
+        : defaultSiteData.users
+      
+      setData({ categories, products, hero, contact, seo, users })
+    } catch {
+      setData(defaultSiteData)
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }, [])
 
-  // Veriyi kaydet
-  const saveData = useCallback((newData: SiteData) => {
-    setData(newData)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newData))
-  }, [])
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
-  // Ürün işlemleri
-  const updateProducts = useCallback((products: Product[]) => {
-    const newData = { ...data, products }
-    saveData(newData)
-  }, [data, saveData])
+  const addProduct = useCallback(async (product: Product) => {
+    await fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(product),
+    })
+    fetchData()
+  }, [fetchData])
 
-  const addProduct = useCallback((product: Product) => {
-    const newProducts = [...data.products, product]
-    updateProducts(newProducts)
-  }, [data.products, updateProducts])
+  const updateProduct = useCallback(async (id: string, product: Product) => {
+    await fetch("/api/products", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...product }),
+    })
+    fetchData()
+  }, [fetchData])
 
-  const updateProduct = useCallback((id: string, product: Product) => {
-    const newProducts = data.products.map(p => p.id === id ? product : p)
-    updateProducts(newProducts)
-  }, [data.products, updateProducts])
+  const deleteProduct = useCallback(async (id: string) => {
+    await fetch("/api/products", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    })
+    fetchData()
+  }, [fetchData])
 
-  const deleteProduct = useCallback((id: string) => {
-    const newProducts = data.products.filter(p => p.id !== id)
-    updateProducts(newProducts)
-  }, [data.products, updateProducts])
+  const addCategory = useCallback(async (category: Category) => {
+    await fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(category),
+    })
+    fetchData()
+  }, [fetchData])
 
-  // Hero içerik güncelle
-  const updateHero = useCallback((hero: HeroContent) => {
-    const newData = { ...data, hero }
-    saveData(newData)
-  }, [data, saveData])
+  const updateCategory = useCallback(async (id: string, category: Category) => {
+    await fetch("/api/categories", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...category }),
+    })
+    fetchData()
+  }, [fetchData])
 
-  // İletişim bilgilerini güncelle
-  const updateContact = useCallback((contact: ContactInfo) => {
-    const newData = { ...data, contact }
-    saveData(newData)
-  }, [data, saveData])
+  const deleteCategory = useCallback(async (id: string) => {
+    await fetch("/api/categories", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    })
+    fetchData()
+  }, [fetchData])
 
-  // SEO ayarlarını güncelle
-  const updateSeo = useCallback((seo: SeoMeta) => {
-    const newData = { ...data, seo }
-    saveData(newData)
-  }, [data, saveData])
+  const updateHero = useCallback(async (hero: HeroContent) => {
+    await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "hero", value: hero }),
+    })
+    fetchData()
+  }, [fetchData])
 
-  // Tüm veriyi sıfırla
+  const updateContact = useCallback(async (contact: ContactInfo) => {
+    await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "contact", value: contact }),
+    })
+    fetchData()
+  }, [fetchData])
+
+  const updateSeo = useCallback(async (seo: SeoMeta) => {
+    await fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "seo", value: seo }),
+    })
+    fetchData()
+  }, [fetchData])
+
+  const addUser = useCallback(async (user: AdminUser) => {
+    await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user),
+    })
+    fetchData()
+  }, [fetchData])
+
+  const updateUser = useCallback(async (id: string, user: AdminUser) => {
+    await fetch("/api/users", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...user }),
+    })
+    fetchData()
+  }, [fetchData])
+
+  const deleteUser = useCallback(async (id: string) => {
+    await fetch("/api/users", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    })
+    fetchData()
+  }, [fetchData])
+
   const resetToDefaults = useCallback(() => {
-    saveData(defaultSiteData)
-  }, [saveData])
+    fetchData()
+  }, [fetchData])
 
   return {
     data,
     isLoading,
-    updateProducts,
     addProduct,
     updateProduct,
     deleteProduct,
+    addCategory,
+    updateCategory,
+    deleteCategory,
     updateHero,
     updateContact,
     updateSeo,
+    addUser,
+    updateUser,
+    deleteUser,
     resetToDefaults,
   }
 }
 
-// Sadece okuma için hook (site sayfaları için)
 export function useSiteDataReadOnly() {
   const [data, setData] = useState<SiteData>(defaultSiteData)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
+    const fetchData = async () => {
       try {
-        const parsed = JSON.parse(stored) as SiteData
-        setData(parsed)
+        const res = await fetch("/api/data")
+        if (!res.ok) {
+          setData(defaultSiteData)
+          return
+        }
+        const json = await res.json()
+        
+        // API'den gelen verileri veya varsayilanlari kullan
+        const categories = Array.isArray(json.categories) && json.categories.length > 0 
+          ? json.categories 
+          : defaultSiteData.categories
+        const products = Array.isArray(json.products) && json.products.length > 0 
+          ? json.products 
+          : defaultSiteData.products
+        const hero = json.hero && typeof json.hero === 'object' && json.hero.title 
+          ? json.hero 
+          : defaultSiteData.hero
+        const contact = json.contact && typeof json.contact === 'object' && json.contact.phone 
+          ? json.contact 
+          : defaultSiteData.contact
+        const seo = json.seo && typeof json.seo === 'object' 
+          ? json.seo 
+          : defaultSiteData.seo
+        const users = Array.isArray(json.users) 
+          ? json.users 
+          : defaultSiteData.users
+        
+        setData({ categories, products, hero, contact, seo, users })
       } catch {
         setData(defaultSiteData)
+      } finally {
+        setIsLoading(false)
       }
     }
-    setIsLoading(false)
+    fetchData()
   }, [])
 
   return { data, isLoading }

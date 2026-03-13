@@ -10,11 +10,16 @@ import { ProductsManager } from "@/components/admin/products-manager"
 import { HeroManager } from "@/components/admin/hero-manager"
 import { ContactManager } from "@/components/admin/contact-manager"
 import { SeoManager } from "@/components/admin/seo-manager"
+import { UsersManager } from "@/components/admin/users-manager"
+import { CategoriesManager } from "@/components/admin/categories-manager"
+import { ServicesManager } from "@/components/admin/services-manager"
+import { BlogManager } from "@/components/admin/blog-manager"
+import { RoomSuggestionsManager } from "@/components/admin/room-suggestions-manager"
 
-type AdminTab = "products" | "hero" | "contact" | "seo"
+type AdminTab = "products" | "categories" | "hero" | "contact" | "services" | "blog" | "rooms" | "seo" | "users"
 
 export default function AdminPage() {
-  const { isAuthenticated, isLoading: authLoading, login, logout } = useAdminAuth()
+  const { isAuthenticated, currentUser, isLoading: authLoading, login, logout, loginError } = useAdminAuth()
   const { 
     data, 
     isLoading: dataLoading,
@@ -24,6 +29,12 @@ export default function AdminPage() {
     updateHero,
     updateContact,
     updateSeo,
+    addUser,
+    updateUser,
+    deleteUser,
+    addCategory,
+    updateCategory,
+    deleteCategory,
     resetToDefaults,
   } = useSiteData()
   
@@ -41,23 +52,42 @@ export default function AdminPage() {
   }
 
   if (!isAuthenticated) {
-    return <AdminLogin onLogin={login} />
+    return <AdminLogin onLogin={login} loginError={loginError} />
   }
+
+  // Kullanıcı listesi yoksa varsayılan kullanıcıları kullan
+  const users = data.users || []
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <AdminHeader onLogout={logout} onReset={resetToDefaults} />
+      <AdminHeader 
+        onLogout={logout} 
+        onReset={resetToDefaults} 
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        currentUserName={currentUser?.name}
+      />
       
       <div className="flex">
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           {activeTab === "products" && (
             <ProductsManager
               products={data.products}
+              categories={data.categories || []}
               onAdd={addProduct}
               onUpdate={updateProduct}
               onDelete={deleteProduct}
+            />
+          )}
+          
+          {activeTab === "categories" && (
+            <CategoriesManager
+              categories={data.categories || []}
+              onAdd={addCategory}
+              onUpdate={updateCategory}
+              onDelete={deleteCategory}
             />
           )}
           
@@ -75,10 +105,29 @@ export default function AdminPage() {
             />
           )}
           
+          {activeTab === "services" && (
+            <ServicesManager />
+          )}
+          
+          {activeTab === "blog" && (
+            <BlogManager />
+          )}
+          
+          {activeTab === "rooms" && (
+            <RoomSuggestionsManager />
+          )}
+          
           {activeTab === "seo" && (
-            <SeoManager
-              seo={data.seo}
-              onUpdate={updateSeo}
+            <SeoManager />
+          )}
+          
+          {activeTab === "users" && (
+            <UsersManager
+              users={users}
+              currentUserId={currentUser?.id || ""}
+              onAdd={addUser}
+              onUpdate={updateUser}
+              onDelete={deleteUser}
             />
           )}
         </main>

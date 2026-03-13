@@ -70,22 +70,22 @@ export function HeroManager({ hero, onUpdate }: HeroManagerProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="buttonText">Buton Metni</Label>
+                <Label htmlFor="ctaText">Ana Buton Metni</Label>
                 <Input
-                  id="buttonText"
-                  value={formData.buttonText}
-                  onChange={(e) => setFormData(prev => ({ ...prev, buttonText: e.target.value }))}
-                  placeholder="Buton metni"
+                  id="ctaText"
+                  value={formData.ctaText}
+                  onChange={(e) => setFormData(prev => ({ ...prev, ctaText: e.target.value }))}
+                  placeholder="Ürünleri Keşfet"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="buttonLink">Buton Linki</Label>
+                <Label htmlFor="ctaSecondaryText">İkinci Buton Metni</Label>
                 <Input
-                  id="buttonLink"
-                  value={formData.buttonLink}
-                  onChange={(e) => setFormData(prev => ({ ...prev, buttonLink: e.target.value }))}
-                  placeholder="/urunler"
+                  id="ctaSecondaryText"
+                  value={formData.ctaSecondaryText}
+                  onChange={(e) => setFormData(prev => ({ ...prev, ctaSecondaryText: e.target.value }))}
+                  placeholder="İletişime Geç"
                 />
               </div>
             </div>

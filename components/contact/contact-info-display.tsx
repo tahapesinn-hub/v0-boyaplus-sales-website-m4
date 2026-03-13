@@ -102,9 +102,7 @@ export function ContactInfoDisplay({ contact }: ContactInfoDisplayProps) {
           <div>
             <h3 className="font-semibold text-foreground mb-1">Çalışma Saatleri</h3>
             <p className="text-muted-foreground">
-              {contact.workingHours.weekdays}<br />
-              {contact.workingHours.saturday}<br />
-              {contact.workingHours.sunday}
+              {contact.workingHours}
             </p>
           </div>
         </div>
