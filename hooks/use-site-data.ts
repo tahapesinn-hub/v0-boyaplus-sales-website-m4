@@ -19,19 +19,35 @@ export function useSiteData() {
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch("/api/data")
-      if (!res.ok) throw new Error("Failed to fetch")
+      if (!res.ok) {
+        setData(defaultSiteData)
+        return
+      }
       const json = await res.json()
       
-      setData({
-        categories: json.categories || defaultSiteData.categories,
-        products: json.products || defaultSiteData.products,
-        hero: json.hero || defaultSiteData.hero,
-        contact: json.contact || defaultSiteData.contact,
-        seo: json.seo || defaultSiteData.seo,
-        users: json.users || defaultSiteData.users,
-      })
-    } catch (error) {
-      console.error("Veri cekme hatasi:", error)
+      // API'den gelen verileri veya varsayilanlari kullan
+      const categories = Array.isArray(json.categories) && json.categories.length > 0 
+        ? json.categories 
+        : defaultSiteData.categories
+      const products = Array.isArray(json.products) && json.products.length > 0 
+        ? json.products 
+        : defaultSiteData.products
+      const hero = json.hero && typeof json.hero === 'object' && json.hero.title 
+        ? json.hero 
+        : defaultSiteData.hero
+      const contact = json.contact && typeof json.contact === 'object' && json.contact.phone 
+        ? json.contact 
+        : defaultSiteData.contact
+      const seo = json.seo && typeof json.seo === 'object' 
+        ? json.seo 
+        : defaultSiteData.seo
+      const users = Array.isArray(json.users) 
+        ? json.users 
+        : defaultSiteData.users
+      
+      setData({ categories, products, hero, contact, seo, users })
+    } catch {
+      setData(defaultSiteData)
     } finally {
       setIsLoading(false)
     }
@@ -180,19 +196,35 @@ export function useSiteDataReadOnly() {
     const fetchData = async () => {
       try {
         const res = await fetch("/api/data")
-        if (!res.ok) throw new Error("Failed to fetch")
+        if (!res.ok) {
+          setData(defaultSiteData)
+          return
+        }
         const json = await res.json()
         
-        setData({
-          categories: json.categories || defaultSiteData.categories,
-          products: json.products || defaultSiteData.products,
-          hero: json.hero || defaultSiteData.hero,
-          contact: json.contact || defaultSiteData.contact,
-          seo: json.seo || defaultSiteData.seo,
-          users: json.users || defaultSiteData.users,
-        })
-      } catch (error) {
-        console.error("Veri cekme hatasi:", error)
+        // API'den gelen verileri veya varsayilanlari kullan
+        const categories = Array.isArray(json.categories) && json.categories.length > 0 
+          ? json.categories 
+          : defaultSiteData.categories
+        const products = Array.isArray(json.products) && json.products.length > 0 
+          ? json.products 
+          : defaultSiteData.products
+        const hero = json.hero && typeof json.hero === 'object' && json.hero.title 
+          ? json.hero 
+          : defaultSiteData.hero
+        const contact = json.contact && typeof json.contact === 'object' && json.contact.phone 
+          ? json.contact 
+          : defaultSiteData.contact
+        const seo = json.seo && typeof json.seo === 'object' 
+          ? json.seo 
+          : defaultSiteData.seo
+        const users = Array.isArray(json.users) 
+          ? json.users 
+          : defaultSiteData.users
+        
+        setData({ categories, products, hero, contact, seo, users })
+      } catch {
+        setData(defaultSiteData)
       } finally {
         setIsLoading(false)
       }
